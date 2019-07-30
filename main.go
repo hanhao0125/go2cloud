@@ -7,45 +7,28 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/gin-gonic/gin"
 )
 
-func watch() {
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer watcher.Close()
+func GinServer() {
+	// init search engine
+	Index("/Users/hanhao/Documents/")
 
-	done := make(chan bool)
-	go func() {
-		for {
-			select {
-			case event := <-watcher.Events:
-				log.Println("event:", event)
-				if event.Op&fsnotify.Write == fsnotify.Write {
-					log.Println("modified file:", event.Name)
-				}
-			case err := <-watcher.Errors:
-				log.Println("error:", err)
-			}
-		}
-	}()
-
-	err = watcher.Add("./") //也可以监听文件夹
-	if err != nil {
-		log.Fatal(err)
-	}
-	<-done
-}
-func watchServer() {
-	go watch()
 	gin.ForceConsoleColor()
 	// 初始化引擎
 	router := gin.Default()
 
 	router.LoadHTMLGlob("templates/*")
+	router.GET("/index", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{"title": "this a test from fserver"})
+	})
+	router.GET("/search", func(c *gin.Context) {
+		query := c.Query("query")
+		res := Search(query)
+		c.JSON(200, gin.H{
+			"docs": res,
+		})
+	})
 	router.POST("/upload", func(c *gin.Context) {
 		name := c.PostForm("name")
 		fmt.Println(name)
@@ -57,7 +40,6 @@ func watchServer() {
 		filename := header.Filename
 
 		fmt.Println(file, err, filename)
-
 		out, err := os.Create(filename)
 		if err != nil {
 			log.Fatal(err)
@@ -74,28 +56,11 @@ func watchServer() {
 		c.HTML(http.StatusOK, "upload.html", gin.H{"title": "this a test from fserver"})
 	})
 
-	// 注册一个路由和处理函数
-	router.Any("/", WebRoot)
-	// 绑定端口，然后启动应用
 	router.Run(":9205")
 
 }
 func main() {
-	// var wg sync.WaitGroup
-	// wg.Add(1)
-	// wg.Add(1)
-	// go StartServer()
-	// go TestClient()
-	// wg.Wait()
+	StartWatchServer("./")
+	// GinServer()
 
-}
-
-/**
-* 根请求处理函数
-* 所有本次请求相关的方法都在 context 中，完美
-* 输出响应 hello, world
- */
-func WebRoot(context *gin.Context) {
-	context.JSON(200, gin.H{"a": "abcs"})
-	// context.String(http.StatusOK, "helloworld")
 }

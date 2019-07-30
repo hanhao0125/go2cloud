@@ -1,0 +1,2065 @@
+嗨！thesis
+
+硕士学位论文
+
+基于多任务深度学习的假新闻检测
+
+FAKE NEWS DETECTION BASED ON MULTI-TASK LEARNING
+
+韩浩
+
+哈尔滨工业大学
+
+2019 年 7 月 国内图书分类号：TM301.2 国际图书分类号：62-5
+
+学校代码：10213 密级：公开
+
+工学硕士学位论文
+
+基于多任务深度学习的假新闻检测
+
+硕 士 研 究 生：韩浩 导 师：王轩教授 副 导 师：廖清副教授 申 请 学 位：工学硕士 学 科：计算机技术 所 在 单 位：哈尔滨工业大学（深圳） 答 辩 日 期：2019 年 7 月 授予学位单位：哈尔滨工业大学 Classiﬁed Index: TM301.2 U.D.C: 62-5
+
+Dissertation for the Master’s Degree in Engineering
+
+FAKE NEWS DETECTION BASED ON MULTI-TASK LEARNING
+
+Candidate: Hao Han Supervisor: Prof. Xuan Wang Associate Supervisor: Associate Prof. Qing Liao Academic Degree Applied for: Master of Engineering Specialty: Computer Technology Aﬃliation: Harbin Institute of Technology,Shenzhen Date of Defence: December, 2019 Degree-Conferring-Institution: Harbin Institute of Technology 哈尔滨工业大学工学硕士学位论文
+
+摘
+
+要
+
+随着互联网的普及，更多的人选择在网络上消费新闻。互联网上的新闻消费 有许多传统新闻消费方式所没有的特点，如消费成本低，时效性高等。然而，正是 因为新闻在互联网上的传播速度快、成本低等原因，大量的假新闻得以肆意传播。 假新闻造成的危害显而易见，轻则损害个人利益，重则引起社会恐慌。毋庸置疑的 是，假新闻的大量涌入给互联网新闻消费这一领域带来了严重的负面影响。因此， 如何识别假新闻，并及时停止其传播，对新闻消费领域至关重要。
+
+假新闻一般是个人或团体故意撰写令人误导的信息以期获取政治或经济利益。 也因为这个特点，假新闻的检测并非易事，其甄别过程往往需要领域知识的介入。 现阶段对抗假新闻的方式主要是通过人工审核，随着人工智能的发展以及在各个 领域获得的成功应用，研究者们期望通过人工智能技术自动检测假新闻。然而，考 虑到当前互联网信息消费的特点，传播新闻的长度往往较短，这些方法的效果在 其上表现不尽人意。
+
+本文回顾了目前假新闻检测的相关方法。其中，基于特征构建的机器学习方法 因为泛化能力较弱而逐渐被抛弃，取而代之使用深度神经网络自动学习特征。考 虑到各个主题下产生假新闻的概率不同，新闻的真实性与新闻的主题存在一定联 系，基于此，本文研究利用多任务深度学习来完成假新闻的自动检测这一任务。其 次，当新闻的文本内容较短时，其提供的信息有限，仅依靠这些少量信息很难取 得满意的效果，所以本文结合了信息的上下文信息，并同时用以提升假新闻检测 和主题分类的性能。
+
+综上，本文提出了用以检测假新闻和主题分类的多任务学习模型。根据调研 结果，本课题首次提出将假新闻检测和主题分类两个任务通过多任务深度学习结 合起来，并取得了目前最好的结果。
+
+关键词：假新闻检测；多任务深度学习；主题分类
+
+-I- 哈尔滨工业大学工学硕士学位论文
+
+Abstract
+
+With the popularity of the Internet, more people choose to consume news on the Internet. There are many features in context of news consumption on the Internet that traditional news consumption does not have, such as low cost of consumption and high timeliness. However, it is precisely because of the rapid spread of news on the Internet, low cost, etc., a large amount of fake news can be spread. The harm caused by fake news is obvious, It hurts personal interests, but causes social panic . Undoubtedly, the inﬂux of fake news has had a serious negative impact on the ﬁeld of Internet news consumption. Therefore, how to identify fake news and stop its dissemination in a timely manner is crucial to the ﬁeld of news consumption.
+
+Fake news is generally an individual or group deliberately writing misleading information in order to obtain political or economic beneﬁts. Because of this feature, the detection of fake news is not an easy task, and its screening process often requires the involvement of domain knowledge. At this stage, the way to counter fake news is mainly through manual review. With the development of artiﬁcial intelligence and successful application in various ﬁelds, researchers hope to automatically detect fake news through artiﬁcial intelligence technology. However, considering the current characteristics of Internet information consumption, the length of dissemination of news is often short, and the eﬀects of these methods are not satisfactory.
+
+This article reviews the current methods of fake news detection. Among them, the machine learning method based on feature construction is gradually abandoned because of the weak generalization ability, and the deep neural network automatic learning feature is used instead. Considering the diﬀerent probability of generating fake news under various themes, the authenticity of news has certain connection with the theme of news. Based on this, this paper studies the task of using multi-task deep learning to complete the automatic detection of fake news. Secondly, when the text content of the news is short, the information provided by it is limited, and it is diﬃcult to obtain satisfactory results by relying on such a small amount of information. Therefore, this paper combines the context information of the information and at the same time enhances performance of fake news detection and topic classiﬁcation. .
+
+In summary, this paper proposes a multi-task learning model to detect fake news and
+
+- II - 哈尔滨工业大学工学硕士学位论文
+
+topic classiﬁcation. According to the survey results, this is the ﬁrst work that proposed combining the two tasks of fake news detection and topic classiﬁcation through multi-task deep learning, and achieved the best results at present.
+
+Keywords: fake news detection, multi-task learning, topic classiﬁcation
+
+- III - 哈尔滨工业大学工学硕士学位论文
+
+目
+
+录
+
+摘
+
+要 ...............................................................................................I
+
+ABSTRACT .......................................................................................II
+
+第1章
+
+绪论 ..................................................................................... 1
+
+1.1 课题研究背景及意义 .................................................................... 1
+
+1.2 国内外研究现状 .......................................................................... 2
+
+1.3 本文的内容 ................................................................................ 4
+
+1.4 本文的结构安排 .......................................................................... 5 第 2 章 假新闻检测相关技术介绍 .......................................................... 6
+
+2.1 文本信息抽取 ............................................................................. 6
+
+2.1.1 文本特征表示 ........................................................................ 6
+
+2.1.2 文本特征抽取 ........................................................................ 8
+
+2.2 注意力机制 ...............................................................................10
+
+2.3 分类学习算法 ............................................................................11
+
+2.4 多任务深度学习 .........................................................................13
+
+2.5 假新闻检测算法 .........................................................................14
+
+2.5.1 基于特征构建的机器学习模型 ..................................................14
+
+2.5.2 基于新闻内容的假新闻检测 .....................................................15
+
+2.5.3 基于用户评论的假新闻检测 .....................................................15
+
+2.5.4 基于网络结构的假新闻检测 .....................................................15
+
+2.5.5 混合模型 .............................................................................16 第 3 章 多任务学习模型的设计与实现 ...................................................17
+
+3.1 嵌入层 .....................................................................................17
+
+3.2 表征层 .....................................................................................18
+
+3.3 多任务学习层 ............................................................................18 第 4 章 模型验证及分析 .....................................................................19
+
+4.1 实验数据 ..................................................................................19
+
+4.2 实验设置 ..................................................................................19
+
+4.2.1 性能指标 .............................................................................19
+
+- IV - 哈尔滨工业大学工学硕士学位论文
+
+4.2.2 假新闻检测对比方法 ..............................................................21
+
+4.2.3 主题分类对比方法 .................................................................21
+
+4.3 性能对比 ..................................................................................21
+
+4.3.1 假新闻检测性能对比 ..............................................................21
+
+4.3.2 主题分类性能对比 .................................................................23 结 论 .............................................................................................26 参考文献 ..........................................................................................27 攻读硕士学位期间发表的论文及其他成果 ................................................30 哈尔滨工业大学学位论文原创性声明和使用权限 .......................................31 致 谢 .............................................................................................32
+
+-V- 哈尔滨工业大学工学硕士学位论文
+
+第 1 章 绪论
+
+1.1 课题研究背景及意义
+
+随着互联网的普及，越来越多的人选择在社交媒体上查看新闻。相比较传统 的新闻消费方式，如报纸、电视等，互联网上的新闻消费有更多优势：用户不仅能 以几乎零成本的方式及时的获取新闻，而且更容易分享、评论，与他人一起讨论 交流。一项 2016 年的调查显示，约有 62% 的美国成年人从互联网上获取新闻，而 这一数字在 2012 年仅为 49% [1] 。假新闻几乎是伴随着新闻而生，其最早可以追溯 1 到 1439 年 O 。然而却始终没有一个严格统一的标准去定义假新闻。可以确定的是， 假新闻有两点明显区别于真新闻的关键特征：真伪性与有意性。也就是说，
+
+1. 假新闻中包含已被证实的虚假信息；
+
+2. 假新闻是被有意撰写来误导读者以期获取利益。 基于此，本文采用文献 [2] 给出的定义，也即： 定义 1.1 假新闻 假新闻是被作者有意撰写以期获取利益并被证实有虚假内容的信 息。 得益于新闻在互联网上的传播速度快、成本低等原因，大量的假新闻得以肆意 传播。假新闻造成的危害显而易见，轻则损害个人利益，重则引起社会恐慌。调查 显示，在 2016 年的美国总统选举中，有关支持候选人的假新闻在美国著名社交媒 体 Facebook 上转发量超过三千七百万次 [3] 。为了及时遏制假新闻的传播，一些组织 2 3 机构提供了揭露假新闻的平台，如国内的微博辟谣 O 、国外的 FACTCHECK.ORG O ， 4 POLITIFACT O 等。然而这些平台通常需要专业知识的介入，并且时效性较低，当 这些平台将假新闻暴露于公众时，假新闻造成的危害往往已经发生。如图1-1所示， 5 Google 工程师因为印度本地关于绑架孩童的谣言被当地暴民殴打致死 O 。 基于以上情况，假新闻的自动检测在近年来得到了广泛的关注。不同于人工 审核，假新闻的自动检测可以让机器根据输入自动判断新闻的真假。研究者们通 过收集新闻的相关数据，如新闻内容、新闻评论等，从中设计一系列可以区分真 假新闻的特征，然后使用机器学习方法训练分类器，进而可以及时停止假新闻的 传播，尽可能的降低其带来的危害。
+
+1 O 2 O
+
+3 O 4 O
+
+5 O
+
+http://www.politico.com/magazine/story/2016/12/fakenews-history-long-violent-214535 https://weibo.com/weibopiyao http://www.factcheck.org https://www.politifact.com https://www.rt.com/news/433297-india-men-lynched-kidnappers-rumor/ -1- 哈尔滨工业大学工学硕士学位论文
+
+图 1-1 Google 工程师因谣言被印度暴民殴打致死
+
+假新闻的检测是一项非常有意义，但却充满挑战的工作。由于假新闻常常伴 随着政治或经济利益，经常被有目的用来误导读者，即使人类自身也很难判断其 真假，尤其是在新闻内容很短时，很难从有限的文本信息中提取有用信息。此时， 必须借助其他信息，如新闻作者、新闻主题等。因此，如何有效的利用新闻的上下 文信息来帮助假新闻的自动检测，是一个亟待研究的问题。
+
+1.2 国内外研究现状
+
+国外关于假新闻检测的研究开始较早。鉴于假新闻在 Twitter、Facebook 等社交 媒体上肆意传播，所以研究者首先从社交媒体上的虚假信息下手。Castillo 等人 [4] 于 2011 年开始研究 Twitter 上信息的真假检测，手工设计了一系列特征，包括文本 特征、用户特征、主题特征、传播特征等，然后以有监督的方式训练分类器，如支 持向量机、决策树等传统机器学习方法。
+
+基于各种网络结构的特征也被证实有助于甄别假新闻。Kwon 等人 [5] 通过分 析谣言的传播过程，发现谣言在传播过程中会出现周期性的波动，而真实信息在 一定时间内仅有一个峰值。此外，一些假新闻制作者常常使用虚假的图片、视频 等激起读者的愤怒情绪，以此吸引读者注意力，获得更广泛的传播。文献 [6,7] 使用 深度神经网络从文本和图片中抽取特征，实验表明，相对于单模态的假新闻检测 （如仅针对文本信息），多模态信息的结合可以提高假新闻检测的准确率。
+
+由于新闻在社交媒体上的传播往往会伴随一系列的社交信息，如转发、分享、 评论等，一些研究者试图通过新闻传播过程中产生的社交信息来检测假新闻。Ma 等人 [8] 于 2016 年首次尝试使用循环神经网络（RNN）对用户的评论进行建模，发 现假新闻下的评论往往带有质疑、否定等字眼；Liu 和 Wu [9] 通过对参与新闻传播 的用户设计特征，如粉丝数、注册时间、是否认证等，并使用卷积神经网络（CNN）
+
+-2- 哈尔滨工业大学工学硕士学位论文
+
+和循环神经网络（RNN）分别抽取参与用户的局部特征和全局特征。由于这种方 法仅使用基本的用户特征作为模型输入，相比其它基于语言特征、结构特征等方 法更加稳健，在早期的假新闻检测中表现良好。
+
+受到多任务学习的启发，Ma 等人 [10] 将谣言检测（rumor detection）和立场检 测（stance detection）一起训练，相比较于单任务训练，其设计的多任务模型能够 捕捉更多有用的潜在模式，如能够发现更多的否定词，其背后的思想是：若用户 对新闻事件更多的是持怀疑、否定态度，则该新闻更可能是假新闻。
+
+国内对虚假信息检测的研究更多的是基于新浪微博。2012 年，Yang 等人 [11] 研 究新浪微博上的谣言检测，他们发现，除了 Castillo 等人提出的一系列特征，使用 微博的客户端（web 端或者手机端）以及微博中提及事件所发生的地点（国内或国 外）同样对真假信息有较强的区分力。2013 年，程亮等人 [12] 设计了基于神经网络 的谣言分类器，设计的特征包括相关微博的数量、微博话题等。Wu 等人 [13] 通过 分析微博上真假信息的传播过程，发现谣言与真实消息在传播过程中的差异：谣 言通常被普通用户发布，经由一些加 V 用户转发后，接着被普通用户转发；而真 实消息首先被加 V 用户发布，然后被许多普通用户转发。微博中经常出现配图与 文本不符的情况，例如谣言发布者经常使用之前的真实图片来形容当前发生的事， 故意夸大事实，博人眼球。为了检测文本与图片不符的谣言，Sun 等人 [14] 通过查 找微博配图在网络中出现的最早时间，用微博发布时间与配图出现的最早时间之 差作为一类特征。2016 年，毛二松等人 [15] 从微博情感倾向性、微博传播过程和微 博用户历史信息等方面提取特征，并利用集成分类器对微博谣言进行检测。
+
+通过以上对国内外研究现状的分析，可以看出，目前假新闻检测的研究都是 将其看作是分类问题，即从新闻内容及新闻在传播过程中产生的社交信息中抽取 特征，然后以有监督的方式训练分类器。早期工作集中于从新闻内容及社交信息 中手工设计特征，例如新闻主体内容的文本特征、新闻主题、传播特征等。然而， 手工设计特征不仅费时费力，通常需要领域知识的介入；更重要的是，新闻涉及 的话题众多，并且来自于各种平台，手工设计出的特征往往仅能反应出某些特定 数据集的特性，很难设计出一套覆盖全面、泛化能力好的特征。
+
+鉴于深度学习强大的特征抽取能力，越来越多的研究者使用深度学习来代替 手工特征的设计。基于此，一系列深度学习模型被用来检测假新闻。其中，使用 RNN 对用户评论进行建模的想法首先被证实有效；一些混合模型有效的结合了文 本、图片等多模态的数据。
+
+假新闻检测领域一直以来缺少一份基准数据集，Wang [16] 在 2017 年从 politifact.com 上收集了一万两千多条短文本新闻，每个新闻都有一个反应新闻真假性的
+
+-3- 哈尔滨工业大学工学硕士学位论文
+
+标签。由于假新闻中往往会掺杂一些真实信息，因此这些标签为以下更细粒度的 六种：pants on ﬁre, false, barely true, half true, mostly true, true。此外，这些新闻从
+
+政治辩论、电视广告、Facebook、Twitter 等上收集而来，并且涵盖了经济、医疗、 教育、税收等多个话题。除了基本的新闻文本信息外，该数据集还提供了丰富的 发言人信息，如发言人姓名、所属党派、工作、历史发言表现等信息。 由于发言人对不同领域的熟悉程度各不相同，因此他们在各个主题下发言的 可信度也不尽相同。鉴于多任务学习（Multi-Task Learning）在计算机视觉、自然 语言处理等方面有许多成功的应用案例，如何在抽取语义特征时，利用多任务学 习融入主题信息，并有效的结合新闻的上下文信息，是一个有待深入研究的问题。
+
+1.3 本文的内容
+
+通过对国内外假新闻检测的研究分析和总结，可以看出，假新闻的检测逐步由 原始的手工设计特征过渡到深度学习自动抽取特征。当新闻主体内容较短时，可 提取的信息〸分有限，新闻上下文信息的使用对提高假新闻检测的准确率至关重 要；并且，由于不同作者对各个领域的熟悉程度不同，因此他们在各个话题下的 话语可信度也不一样。
+
+如图1-3所示，关于医疗的新闻相比较教育主题的新闻而言，假新闻占比更多; 图1-3揭示了不同作者其发表真假新闻的概率分布也有很大差距。
+
+3%
+
+0%
+
+10%
+
+17%
+
+10%
+
+27%
+
+9%
+
+29%
+
+16%
+
+10%
+
+15%
+
+30%
+
+Pants-fire False Barely-true Half-true Mostly-true True
+
+25%
+
+30%
+
+Donald-Trump
+
+Barack-Obama
+
+图 1-2 作者真假分布
+
+5%
+
+12%
+
+11%
+
+16%
+
+24%
+
+22%
+
+16%
+
+Pants-fire False Barely-true Half-true Mostly-true True
+
+19%
+
+19%
+
+25%
+
+Health-care
+
+Education
+
+图 1-3 主题真假分布
+
+为了解决上述两个问题，本文将假新闻检测和新闻主题分类一起训练，并且
+
+-4- 哈尔滨工业大学工学硕士学位论文
+
+有效的融合新闻的上下文信息，同时提升假新闻检测和主题分类的效果。本课题 的最终目标可总结为：给定新闻及其新闻的上下文信息，模型不仅输出新闻更细 粒度的真假信息，而且同时输出新闻讨论的主题。 具体工作内容如下：
+
+1. 分析新闻的真实性与新闻的主题、新闻的作者之间的关系；
+
+2. 基于多任务深度学习，设计并实现多任务深度学习模型，将新闻的真实性 检测和新闻的主题分类同时训练，并提高二者的任务表现；
+
+3. 研究如何利用新闻的上下文信息，以同时帮助假新闻的检测和新闻的主题 分类，包括上下文信息的特征表示、特征抽取、特征融合等。
+
+1.4 本文的结构安排
+
+本文主要研究假新闻的自动检测问题，共包含四个章节，本篇论文的组织结 构如下：
+
+第一章为绪论，首先详细介绍了假新闻产生的背景以及相关定义、假新闻的 危害、假新闻的自动检测的难点以及研究意义。然后针对上述问题的国内外研究 现状进行了总结。接着概述了本文的研究内容，引出本文研究的三个主要问题，最 后阐述了本文的组织结构安排。
+
+第二章主要对本文用到的相关知识进行详细介绍。本章首先概述了假新闻检 测的一般解决思路以及可能存在的不足。接着介绍了深度学习模型在文本处理上 的应用，最后总结了假新闻检测的常见研究方法
+
+第三章详细介绍了本文提出的多任务学习模型。首先介绍了通过数据分析得 到的新闻主题及其真实性的潜在关系，然后介绍了模型的具体设计思路，并对比 了其他主流方法。最后对提出的模型进行具体的实现并提供与当前主流算法的性 能比较。
+
+第四章对假新闻检测的实验设置及结果进行了详细的分析。首先简要的概述 了对比方法的实现思路。然后针对实验提出若干衡量标准。最后提供了详细的对 比结果及分析。
+
+-5- 哈尔滨工业大学工学硕士学位论文
+
+第 2 章 假新闻检测相关技术介绍
+
+2.1 文本信息抽取
+
+一般来说，新闻的组成部分通常包括新闻作者、新闻内容等，一些新闻为了丰 富新闻内容，可能会在新闻中插入若干图片。本文讨论的新闻主要涉及文本内容。 检测假新闻的第一步便是从新闻的文本内容冲抽取相关特征表示。下面就文本特 征表示、文本特征抽取、注意力机制三个方面做详细介绍。
+
+2.1.1 文本特征表示
+
+在处理自然语言处理领域的问题时，文本的特征表示一直是个老大难的问题。 不同于图片其早已呈现成数值矩阵的形式，自然语言虽然对人类来说直观且易于 理解，但对计算机来说只能将其看出不连续的一个个字符。相关研究者在自然语 言的数学表示上付出了巨大努力并取得不凡的成绩。
+
+在表示一段文档时，TFIDF 是一个不错的选择。在一份给定的文件里，词频 （Term Frequency，TF）指的是某一个给定的词语在该文件中出现的频率。这个数 字是对词数（Term Count）的归一化，以防止它偏向长的文件。（同一个词语在长 文件里可能会比短文件有更高的词数，而不管该词语重要与否。）对于在某一特定 文件里的词语来说，它的重要性可表示为： n i,j TF i,j = Í (2-1) k n k,j
+
+逆向文件频率（Inverse Document Frequency，IDF）是一个词语普遍重要性的 度量。某一特定词语的 IDF，可以由总文件数目除以包含该词语之文件的数目，再 将得到的商取以 10 为底的对数得到： |D| IDF i = lg    (2-2)  j : t i ∈ d j 
+
+然后 TF-IDF 可以表示为
+
+TFIDF
+
+i,j
+
+= TF i,j × IDF i
+
+(2-3)
+
+某一特定文件内的高词语频率，以及该词语在整个文件集合中的低文件频率， 可以产生出高权重的 TF-IDF。因此，TF-IDF 倾向于过滤掉常见的词语，保留重要 的词语。使用 TFIDF 便可以将一份文档表示为一个固定长度的向量，其中该向量 的长度等于词典大小。TF-IDF 经常被用来计算两个文档的相似性。
+
+-6- 哈尔滨工业大学工学硕士学位论文
+
+在使用深度神经网络时，往往将自然语言处理相关问题看做是一个序列问题： 对于文档中的每个词，将其表示为一个向量，整个句子或文档则是一个由若干向 量组成的序列。如何将每个词表示为向量？一个简单直观的方式是针对每个字给 与一个独热编码（one-hot encoding），独热编码下，每个词可以表示为如下向量：
+
+c i = [0,0,0,.,i,..,0,0,0] T
+
+(2-4)
+
+其中，向量长度为词典大小，仅该词对应的位置 i 为 1，其余位置均为 0。不 过这种表示存在以下问题
+
+• 词典较大，导致向量维度急剧增长，存储和计算都不高效。
+
+• 词与词之间没有关系，各个词之间的表示无法表示其逻辑上的关系。 2013 年，由 Mikolov 等人 [17] 提出的分布式词向量在很大程度上解决了独热编 码存在的弊端，并在接下来的几年被自然语言处理领域接受，其提出的 word2vec 模型获得了广泛应用。 word2vec 的基本思想是利用大量无监督的语料库去学习一个神经网络语言模 型，其训练模型按照训练目标可分为以下两种：
+
+• CBOW:Continuous Bag of Words, 其任务是根据词的上下文信息 context(w) 预测当前是哪个词
+
+• Skip-Garm: 其任务是根据当前词 w 来预测当前词的上下文语境 context(w) 下图2-1展示了 word2vec 的两种训练方式。
+
+INPUT
+
+PROJECTION
+
+SUM
+
+OUPUT
+
+INPUT
+
+PROJECTION
+
+Skip-gram
+
+OUPUT
+
+w(t-2)
+
+w(t-1)
+
+w(t+1)
+
+w(t+1)
+
+w(t-2)
+
+w(t-1)
+
+w(t)
+
+w(t)
+
+w(t+1)
+
+w(t+1)
+
+CBOW:Continuous Bag of Words
+
+图 2-1 word2vec 两种训练方式
+
+由于语料库中词表可能巨大，一般对中文来说，词表大小可达 200，000，英语
+
+-7- 哈尔滨工业大学工学硕士学位论文
+
+可达 30，000。为了加速模型训练，word2vec 使用了 Hierarchical Softmax 和 Negative Sampling 来加速计算。由 word2vec 得到的词向量是一个富含了语义信息的低纬度 稠密向量，如此一来便解决了独热编码所引起的问题。
+
+图 2-2 word2vec 在三维空间的可视化
+
+经由 word2vec 训练得到的词向量蕴含了语义信息，其直观体现为词义相近的 词其词向量距离较近，图2-2直观的表现出这种特性。
+
+但是，word2vec 在一词多义这个问题上并没有办法识别，由于每个词唯一对 应一个词向量，所以如苹果（水果）和苹果（苹果公司），word2vec 将其视为同一 个词。有没有办法解决呢？近期推出了模型 ELMo [18] ，GPT [19] ，BERT [20] 等模型 都不同程度的致力于解决这个问题，由于这些不是本文重点，因此不做详细介绍， 更多细节可阅读相关论文。
+
+2.1.2 文本特征抽取
+
+在获得文本的信息表示后，如使用 word2vec 获取每个词的词向量，则句子可 以表示为一个序列
+
+χ = x 1 , x 2 ,..., x T
+
+(2-5)
+
+其中 T 表示文本的长度，为了获取一个固定长度的向量表示，需要使用一些 特殊结构的神经网络来获取。一个简单的方法是直接在词向量上施加 Pooling 即 可。这种方式看似简单，但是已有文献证明其有效性 [21] 。此外，还有一些网络结 构来专门处理这种问题，如接下来要介绍的循环神经网络和卷积神经网络。 2.1.2.1 循环神经网络
+
+循环神经网络（RNN）最早由 Elman [22] 于 1990 年提出，可以对具有时间序列 的对象进行建模，在 t 时刻的神经元状态受它前面 t-1 时刻神经元状态的影响。通
+
+-8- 哈尔滨工业大学工学硕士学位论文
+
+过不断的输入时间序列的数据，RNN 能够记忆前面的信息并将其参与到后续的计 算当中，从而获得整个时间序列对象的高层特征表示。RNN 模型结构及其展开图 如图2-3所示。 o! o! o! o! t−1 t−1 t t+1
+
+V!
+
+V!
+
+V!
+
+V!
+
+W!
+
+઀୏
+
+S! t−1
+
+S! t
+
+S! t+1
+
+W!
+
+W!
+
+W!
+
+W!
+
+U!
+
+U!
+
+U!
+
+U!
+
+x! t−1
+
+x! t−1
+
+x! t
+
+x! t+1
+
+图 2-3 循环神经网络计算方式
+
+RNN 结构简单，但在处理较长序列时，会出现梯度消失或梯度爆炸的问题，这 使得 RNN 很难去学习长期依赖。GRU（Gated Recurrent Unit）由 Chung 等人 [23] 于 2014 年提出，通过引入门结构，很大程度上解决了 RNN 的梯度消失问题。GRU 内部的转换公式如公式2-6所示：
+
+z t = σ (W z x t + U z h t−1 ) r t = σ (W r x t + U r h t−1 )
+
+(2-6)
+
+′ t
+
+h = tanh (W h x t + U h (h t−1 · r t )) h t = (1 − z t ) · h t−1 + z t · h t ′
+
+其中， x t 为 t 时间步的词向量，重置门 r t x t 与之前的记忆结合，更新门 z t 决 定了是否将之前的记忆参与到后面的计算。通过 GRU 的计算，我们可以得到每 个时间步的隐含层输出 h 1 , h 2 ,, h n ，为了获得整个序列的语义表示，可以对其进行 average pooling 或 max pooling，或直接取最后一个时间步的输出 h n 作为最终的特 征表示。与 GRU 类似的长短期记忆网络（Long Short Term Memroy，LSTM）也是 为了解决 RNN 无法学习长期依赖而提出的，其也是通过门结构控制信息流入流出 来达到这一目的，详细原理不再赘述。 2.1.2.2 卷积神经网络
+
+卷积神经网络（Convolutional Neural Networks，CNN）在计算机视觉方面取得 了巨大成功。2014 年，Yoon Kim 将 CNN 成功的运用于文本的特征抽取，并取得了 很好的效果。CNN 通过使用卷积核去扫描文本的词向量矩阵，以获得特征图。具 体地，特征图 c i 可由下式获得：
+
+-9- 哈尔滨工业大学工学硕士学位论文
+
+c i = f (W · x i:i+h−1 + b)
+
+(2-7)
+
+其中 W 为权值矩阵，b 为对应的偏置项。F 为非线性激活函数，如 ReLU、Tanh 等。 x ( i : i + h − 1) 表示长度为 h 的词向量矩阵，通过扫描整个文本的词向量矩阵， 该卷积核可生成特征图：
+
+c = [c 1 ,c 2 ,. . .,c n−h+1 ]
+
+(2-8)
+
+′ =maxc
+
+接着通过最大池化（Max-Pooling）后获得最具表示能力的特征：c 。以 上过程描述了一个卷积核的计算过程。通常情况下，会使用不同大小的卷积窗口， 并且每个卷积窗口使用多个卷积核来捕捉不同层次的特征。如图2-4展示了使用 2， 3，4 卷积窗口，并且每个卷积窗口有 2 个卷积核的卷积操作。
+
+h
+
+1 h 2
+
+h
+
+3
+
+. . .
+
+h
+
+T
+
+Multiple Filters
+
+Max-Pooling
+
+Concat
+
+图 2-4 卷积神经网络在文本上的应用
+
+2.2 注意力机制
+
+注意力机制（Attention）最早是应用于图像领域的。2014 年，Google mind 团 队在 RNN 模型上使用了 attention 机制来进行图像分类，取得了很好的性能 [24] 。随 后 Bahdanau 等人 [25] 在论文《Neural Machine Translation by Jointly Learning to Align and Translate》中，使用类似 attention 的机制在机器翻译任务上将翻译和对齐同时 进行，他们的工作算是第一个将 attention 机制应用到 NLP 领域中。接着 attention 机 制就被广泛应用在基于 RNN/CNN 等神经网络模型的各种 NLP 任务中去了。2017
+
+- 10 -
+
+Feature Representation 哈尔滨工业大学工学硕士学位论文
+
+年，google 机器翻译团队发表 [26] 的《Attention is all you need》中大量使用了自注 意力（self-attention）机制来学习文本表示。由于其优异的表现吸引了研究者的目
+
+光，自注意力机制也自然而然的成为了大家近期的研究热点，并在各种 NLP 任务 上进行探索，纷纷都取得了很好的性能。其提出的 Transformer 模型也被证实其强 大的特征抽取能力。
+
+注意力机制的本质是从人类视觉注意力机制中获得灵感。人类视觉在感知东 西的时候，一般不会是一个场景从到头看到尾每次全部都看，而往往是根据需求 观察注意特定的一部分。而且当我们发现一个场景经常在某部分出现自己想观察 的东西时，我们就会进行学习在将来再出现类似场景时把注意力放到该部分上。
+
+Attention 的计算可以总结为公式2-9：  T  QK Attention (Q,K,V) = softmax √ V (2-9) d k
+
+其中，Q，K，V 分别称为 Query，Key，Value。
+
+下图可以直观的理解 Attention 的作用。可以发现，对比传统的网络结构，使 用 Self-Attention 机制可以在编码一个词时综合考虑其上下文，从而得到该词在该 语境下的信息表示。
+
+图 2-5 Attention 机制的可视化
+
+2.3 分类学习算法
+
+根据数据类型的不同，对一个问题的建模有不同的方式。在机器学习或者人 工智能领域，人们首先会考虑算法的学习方式。在机器学习领域，有几种主要的 学习方式。将算法按照学习方式分类是一个不错的想法，这样可以让人们在建模 和算法选择的时候考虑能根据输入数据来选择最合适的算法来获得最好的结果。
+
+其中，分类学习算法属于监督学习算法。分类算法实际应用广泛，如垃圾邮
+
+- 11 - 哈尔滨工业大学工学硕士学位论文
+
+件分类、评论情感分析、糖尿病检测等，因而受到了研究者们的青睐，大量的分类 学习算法运用而生。
+
+分类学习算法的基本思想可以总结为如下：给定训练数据 [X,Y]，其中 X 为 输入，Y 对应输出，其可以是二分类，对应 Y 的值域则为 [01]；也可以是多分类， 对应的值域则为 [0,1,2,..., N − 1]（N 为分类个数）。分类学习算法的目的是根据 训练数据 [X,Y]，训练一个分类学习模型 F，其可以针对未预见的样本 x 进行预 测，从而得到预测值 y predict 。常见的机器学习分类算法有：逻辑斯蒂回归（Logistic regression）、决策树（Decision Tree）、朴素贝叶斯（Naive Bayes）等，还有一些常 见的集成学习算法如 AdaBoost、GBDT、XGBoost、随机森林（Random Forest）等。
+
+随着深度学习的兴起，基于神经网络的分类器也得到了广泛的研究与应用。神 经网络模型是一个非常强大的模型，起源于尝试让机器模仿大脑的算法，在 80 年 代和 90 年代早期非常流行。同时它又是一个〸分复杂的模型，导致其计算量非常 巨大，所以在 90 年代后期逐渐衰落。近年来得益于计算机硬件能力，又开始流行 起来。人类的大脑是一个〸分神奇的东西，尽管当今人工智能科技已经〸分发达， 但很大程度上，无论建立一个多么完美的模型，其学习能力目前仍然逊色于大脑。 因此神经网络是人工智能领域的一个热门研究方向。
+
+为了描述神经网络模型，我们先从最简单的神经网络讲起，这个神经网络仅 由一个“神经元”构成，图2-6 a)展示了具有一个神经元的神经网络。其中 x 1 , x 2 , x 3 称为输入（来自与其他神经元的输入信号）, x 0 称为偏置单元 (Bias Unit), θ 称为权 重或参数, h θ (x) 称为激活函数（Activation Function）。这里，使用 Sigmoid 激活函 数可以直接输出待分类的概率，Sigmoid 函数的计算公式如公式2-10所示： 1 σ(z) = −z (2-10) 1+e
+
+使用 Sigmoid 函数对输出单元进行非线性变化。最终输出值即为输入样本为 正例的概率。如图2-6 b)展示了其变化曲线。可以看到，Sigmoid 激活函数将输入 z ∈ R 压缩到 σ(z) ∈ [0,1]
+
+面对多分类问题，可以直接改变输出单元个数，并在输出上施加 Softmax 函 数，如此一来便可得到输入样本属于各个类别的概率，取输出概率最大的类别即 为预测类别。
+
+Softmax 函数，或称归一化指数函数. 是逻辑函数的一种推广。它能将一个含 任意实数的 K 维向量“压缩”到另一个 K 维实向量中，使得每一个元素的范围都在 (0,1) 之间，并且所有元素的和为 1。该函数的形式通常按下面的式子给出：
+
+- 12 - 哈尔滨工业大学工学硕士学位论文
+
+x
+
+<latexit
+
+sha1_base64="
+
+1zRCEux+RxwGl33x2y+N/4OEkSA="
+
+>AAACxnicjVHLSsNAFD2Nr1pfVZdugkVwVRIVdFl002VF+4BaSjKd1qFpEiYTtRTBH3Crnyb+gf6Fd8YU1CI6IcmZc+85M/dePw5EohznNWfNzS8sLuWXCyura+sbxc2tRhKlkvE6i4JItnwv4YEIeV0JFfBWLLk38gPe9IdnOt684TIRUXipxjHvjLxBKPqCeYqoi7uu0y2WnLJjlj0L3AyUkK1aVHzBFXqIwJBiBI4QinAADwk9bbhwEBPXwYQ4SUiYOMc9CqRNKYtThkfskL4D2rUzNqS99kyMmtEpAb2SlDb2SBNRniSsT7NNPDXOmv3Ne2I89d3G9PczrxGxCtfE/qWbZv5Xp2tR6OPE1CCoptgwujqWuaSmK/rm9peqFDnExGnco7gkzIxy2mfbaBJTu+6tZ+JvJlOzes+y3BTv+pY0YPfnOGdB46DsHpYPzo9KldNs1HnsYBf7NM9jVFBFDXXyHuART3i2qlZopdbtZ6qVyzTb+Lashw8M+ZAk</latexit>
+
+1.0
+
+0
+
+0.8
+
+0.6
+
+0.4
+
+0.2
+
+0.0
+
+(z)=
+
+1 1+e
+
+z
+
+x
+
+<latexit
+
+sha1_base64="
+
+ThYIhcA69zbvV725kSqfGUSBpLE="
+
+>AAACx3icjVHLSsNAFD2Nr1pfVZdugkVwVZIq6LLoRncV7ANqKUk6bUPzYjIpLcWFP+BW/0z8A/0L74xTUIvohCRnzr3nzNx73STwU2FZrzljaXlldS2/XtjY3NreKe7uNdI44x6re3EQ85brpCzwI1YXvghYK+HMCd2ANd3RpYw3x4ynfhzdimnCOqEziPy+7zlCUpOuXegWS1bZUstcBLYGJehVi4svuEMPMTxkCMEQQRAO4CClpw0bFhLiOpgRxwn5Ks5wjwJpM8pilOEQO6LvgHZtzUa0l56pUnt0SkAvJ6WJI9LElMcJy9NMFc+Us2R/854pT3m3Kf1d7RUSKzAk9i/dPPO/OlmLQB/nqgafakoUI6vztEumuiJvbn6pSpBDQpzEPYpzwp5SzvtsKk2qape9dVT8TWVKVu49nZvhXd6SBmz/HOciaFTK9km5cnNaql7oUedxgEMc0zzPUMUVaqiT9xCPeMKzcW3ExtiYfKYaOa3Zx7dlPHwATeWQOQ==</latexit>
+
+x
+
+<latexit
+
+sha1_base64="
+
+9h0Qzf1tZEMpazRBV6uLTE3xGNY="
+
+>AAACxnicjVHLSsNAFD2Nr1pfVZdugkVwVZIq6LLopsuK9gG1lGQ6rcE0CZOJWorgD7jVTxP/QP/CO+MU1CI6IcmZc+85M/dePwmDVDrOa86am19YXMovF1ZW19Y3iptbzTTOBOMNFoexaPteysMg4g0ZyJC3E8G9kR/yln99quKtGy7SII4u5Djh3ZE3jIJBwDxJ1Pldr9Irlpyyo5c9C1wDSjCrHhdfcIk+YjBkGIEjgiQcwkNKTwcuHCTEdTEhThAKdJzjHgXSZpTFKcMj9pq+Q9p1DBvRXnmmWs3olJBeQUobe6SJKU8QVqfZOp5pZ8X+5j3RnupuY/r7xmtErMQVsX/pppn/1alaJAY41jUEVFOiGVUdMy6Z7oq6uf2lKkkOCXEK9ykuCDOtnPbZ1ppU16566+n4m85UrNozk5vhXd2SBuz+HOcsaFbK7kG5cnZYqp6YUeexg13s0zyPUEUNdTTIe4hHPOHZqlmRlVm3n6lWzmi28W1ZDx8RuZAm</latexit>
+
+1
+
+h ✓ (x)
+
+<latexit
+
+sha1_base64="
+
+ke1wn07DLug6Ba6s1AlS5/gby4A="
+
+>AAAC0HicjVHLTsJAFD3UF+ILdemmkZjghrRookuiG5do5JEAIW0ZoKG0dTo1EEKMW3/ArX6V8Q/0L7wzlkQlRqdpe+bce87MvdcOPTcShvGa0hYWl5ZX0quZtfWNza3s9k41CmLusIoTeAGv21bEPNdnFeEKj9VDzqyh7bGaPTiX8dot45Eb+NdiHLLW0Or5btd1LEFUq9+eNEWfCWuaHx22szmjYKilzwMzATkkqxxkX9BEBwEcxBiCwYcg7MFCRE8DJgyExLUwIY4TclWcYYoMaWPKYpRhETugb492jYT1aS89I6V26BSPXk5KHQekCSiPE5an6SoeK2fJ/uY9UZ7ybmP624nXkFiBPrF/6WaZ/9XJWgS6OFU1uFRTqBhZnZO4xKor8ub6l6oEOYTESdyhOCfsKOWsz7rSRKp22VtLxd9UpmTl3klyY7zLW9KAzZ/jnAfVYsE8KhQvj3Ols2TUaexhH3ma5wlKuEAZFfK+wSOe8KxdaSPtTrv/TNVSiWYX35b28AEHTZR7</latexit>
+
+2
+
+x 3
+
+<latexit
+
+sha1_base64="
+
+Lr5mxRkQqJRPVr2CYH1Lud1mqE4="
+
+>AAACxnicjVHLSsNAFD2Nr1pfVZdugkVwVZJW0GXRTZcV7QNqKUk6rUPzIpmopQj+gFv9NPEP9C+8M05BLaITkpw5954zc+91Y5+nwrJec8bC4tLySn61sLa+sblV3N5ppVGWeKzpRX6UdFwnZT4PWVNw4bNOnDAncH3WdsdnMt6+YUnKo/BSTGLWC5xRyIfccwRRF3f9ar9YssqWWuY8sDUoQa9GVHzBFQaI4CFDAIYQgrAPByk9XdiwEBPXw5S4hBBXcYZ7FEibURajDIfYMX1HtOtqNqS99EyV2qNTfHoTUpo4IE1EeQlheZqp4plyluxv3lPlKe82ob+rvQJiBa6J/Us3y/yvTtYiMMSJqoFTTbFiZHWedslUV+TNzS9VCXKIiZN4QPGEsKeUsz6bSpOq2mVvHRV/U5mSlXtP52Z4l7ekAds/xzkPWpWyXS1Xzo9KtVM96jz2sI9DmucxaqijgSZ5j/CIJzwbdSM0MuP2M9XIac0uvi3j4QMUGZAn</latexit>
+
+-10.0 -7.5
+
+-5.0 -2.5
+
+0.0 2.5 z
+
+5.0 7.5
+
+10.0
+
+a) 具有一个神经元的神经 网络
+
+b) Sigmoid 激活函数
+
+图 2-6 简单神经网络与激活函数示例
+
+e
+
+z
+
+j
+
+σ(z) j =
+
+Í K k=1
+
+for j = 1,. . .,K
+
+(2-11)
+
+e
+
+z k
+
+为了增加神经网络的拟合能力，通常使用多层的神经网络来应对较复杂的分 类问题，如图2-7展示了使用三层神经网络处理六分类的问题。
+
+
+
+ℝ⁷
+
+ ∈ ℝ¹⁰
+
+ ∈ ℝ¹⁰
+
+图 2-7 三层神经网络处理六分类问题
+
+∈ ℝ⁶
+
+2.4 多任务深度学习
+
+相较于传统的单任务学习，多任务学习的目标是通过利用多个相关学习任务 之间的有用信息来提升它们的表现。基于深度神经网络的多任务学习通常有两种 方法：隐层参数的硬共享与软共享。
+
+- 13 -
+
+(z) - 图 2-8 多任务学习的硬参数共享
+
+硬参数共享是多任务深度学习中最常用的方法。通常通过在所有任务之间共 享隐藏层,同时保留几个特定任务的输出层来实现。这种方式大大降低了过拟合 的风险,同时学习的任务越多,模型找到一个含有所有任务的表征就越困难,而 过拟合原始任务的可能性就越小。图2-8展示了基于深度神经网络的硬参数共享方 式的多任务学习方法。
+
+另一方面,当使用软参数共享时,每个任务都有自己的参数和模型。模型参 数之间的距离是正则化的,以便鼓励参数相似化。
+
+本课题采用硬参数共享的方式,设计多任务深度学习模型,同时训练新闻的 真实性检测任务与新闻的主题分类任务。
+
+2.5 假新闻检测算法
+
+近年来,大量研究者提出了有效的模型及算法用以检测假新闻,本章对现存 的模型及算法做一个总结,并对各个模型及算法做简单介绍。
+
+2.5.1 基于特征构建的机器学习模型
+
+通过对已有数据进行特征抽取,然后以此为特征集去训练机器学习模型,是一 个简单直接的想法。这类方法的主要工作在于从数据中构建大量可能有用的特征 集,然后以有监督的方式训练机器学习模型,如支持向量机、决策树等。如 Castillo 等人 [4] 于 2011 年开始研究 Twitter 上信息的真假检测,手工设计了一系列特征,包 括文本特征、用户特征、主题特征、传播特征等。这里的文本特征可以使用上述介 绍的 TF-IDF 来表示,用户特征则主要包括用户性别、注册时长等。这一类方法的
+
+- 14
+
+੶ۓՁ੶
+
+ᇙਧձو
+
+ۓձ
+
+ۓձ
+
+ۓ哈尔滨工业大学工学硕士学位论文
+
+ձ - x
+
+<latexit
+
+sha1_base64="
+
+a29QGTz9GvbXL3X0Kdnw4v0GjJ4="
+
+>AAACxnicjVHLSsNAFD2Nr1pfVZdugkVwVRIVdFl002VF+4BaSjKd1tA0CZOJWorgD7jVTxP/QP/CO+MU1CI6IcmZc+85M/dePwmDVDrOa86am19YXMovF1ZW19Y3iptbjTTOBON1FoexaPleysMg4nUZyJC3EsG9kR/ypj88U/HmDRdpEEeXcpzwzsgbREE/YJ4k6uKu63aLJafs6GXPAteAEsyqxcUXXKGHGAwZRuCIIAmH8JDS04YLBwlxHUyIE4QCHee4R4G0GWVxyvCIHdJ3QLu2YSPaK89UqxmdEtIrSGljjzQx5QnC6jRbxzPtrNjfvCfaU91tTH/feI2Ilbgm9i/dNPO/OlWLRB8nuoaAako0o6pjxiXTXVE3t79UJckhIU7hHsUFYaaV0z7bWpPq2lVvPR1/05mKVXtmcjO8q1vSgN2f45wFjYOye1g+OD8qVU7NqPPYwS72aZ7HqKCKGurkPcAjnvBsVa3Iyqzbz1QrZzTb+Lashw8PWZAl</latexit>
+
+1
+
+x
+
+<latexit
+
+sha1_base64="
+
+9h0Qzf1tZEMpazRBV6uLTE3xGNY="
+
+>AAACxnicjVHLSsNAFD2Nr1pfVZdugkVwVZIq6LLopsuK9gG1lGQ6rcE0CZOJWorgD7jVTxP/QP/CO+MU1CI6IcmZc+85M/dePwmDVDrOa86am19YXMovF1ZW19Y3iptbzTTOBOMNFoexaPteysMg4g0ZyJC3E8G9kR/yln99quKtGy7SII4u5Djh3ZE3jIJBwDxJ1Pldr9Irlpyyo5c9C1wDSjCrHhdfcIk+YjBkGIEjgiQcwkNKTwcuHCTEdTEhThAKdJzjHgXSZpTFKcMj9pq+Q9p1DBvRXnmmWs3olJBeQUobe6SJKU8QVqfZOp5pZ8X+5j3RnupuY/r7xmtErMQVsX/pppn/1alaJAY41jUEVFOiGVUdMy6Z7oq6uf2lKkkOCXEK9ykuCDOtnPbZ1ppU16566+n4m85UrNozk5vhXd2SBuz+HOcsaFbK7kG5cnZYqp6YUeexg13s0zyPUEUNdTTIe4hHPOHZqlmRlVm3n6lWzmi28W1ZDx8RuZAm</latexit>
+
+2
+
+x
+
+<latexit
+
+sha1_base64="
+
+vRCQI/LBKpH3sf08R9Ivtsruv5E="
+
+>AAACxnicjVHLSsNAFD2Nr1pfVZdugkVwVRIVdFl002VF+4BaSjKd1qFpEpKJWorgD7jVTxP/QP/CO+MU1CI6IcmZc+85M/dePw5EKh3nNWfNzS8sLuWXCyura+sbxc2tRhplCeN1FgVR0vK9lAci5HUpZMBbccK9kR/wpj88U/HmDU9SEYWXchzzzsgbhKIvmCeJurjrht1iySk7etmzwDWgBLNqUfEFV+ghAkOGEThCSMIBPKT0tOHCQUxcBxPiEkJCxznuUSBtRlmcMjxih/Qd0K5t2JD2yjPVakanBPQmpLSxR5qI8hLC6jRbxzPtrNjfvCfaU91tTH/feI2Ilbgm9i/dNPO/OlWLRB8nugZBNcWaUdUx45Lprqib21+qkuQQE6dwj+IJYaaV0z7bWpPq2lVvPR1/05mKVXtmcjO8q1vSgN2f45wFjYOye1g+OD8qVU7NqPPYwS72aZ7HqKCKGurkPcAjnvBsVa3Qyqzbz1QrZzTb+Lashw+gOZBi</latexit>
+
+n
+
+图 2-9 基于循环神经网络的假新闻检测
+
+2.5.2 基于新闻内容的假新闻检测
+
+基于以上介绍的文本信息抽取,可以使用 word2vec 等类似方法将每个词表示 为一个词向量,对于新闻内容,则是一个由词向量组成的一个序列。此时我们便 可以使用基于 RNN 或 CNN 类似的方法进行特征抽取,然后送入分类器进行分类。 如 Wang [16] 在抽取文本特征时使用了 CNN 模型;而 Long 等人 [27] 使用了 LSTM 进行文本特征的抽取;Karimi 等人 [28] 通过组合 CNN 和 LSTM 对文本特征进行抽 取。图2-9展示了使用循环神经网络检测假新闻。
+
+2.5.3 基于用户评论的假新闻检测
+
+如国内外研究现状所述,一些研究者通过对用户对新闻的回应(评论、转发 等)进行建模,基于抽取的特征建立分类器。针对图2-9中的输入, x i 则可以表示 为每个用户的评论,如 Ma 等人 [8] 使用 LSTM 对用户评论进行建模,取得了不错 的效果。再如 [9] 分别使用 LSTM 和 CNN 对参与评论用户的特征进行特征抽取,主 要用到的是用户的基本信息,如用户性别、注册时长等。针对图2-9中的输入, x i 则可以表示为每个用户的基本信息。
+
+这类方法的主要缺点是需要新闻传播过程产生的大量数据,缺少时效性。
+
+2.5.4 基于网络结构的假新闻检测
+
+待补充
+
+- 15
+
+فɜᡐ੶
+
+...
+
+ᬌ
+
+...
+
+ڊ哈尔滨工业大学工学硕士学位论文
+
+缺点是基于手工设计的特征其泛化能力较弱,鉴于假新闻通常涵盖主题广,因此, 很难设计一个通用的特征集。 所以,近年来的方法更多的是基于深度学习的模型,通过构建有效的深度神 经网络,特征抽取的工作由神经网络自动完成。
+
+፥
+
+؃
+
+ᬌ 哈尔滨工业大学工学硕士学位论文
+
+2.5.5 混合模型
+
+一些研究者通过组合多种特征来构建更强大的混合模型，从而提升假新闻检 测的性能。如 Ruchansky 等人 [29] 将用户信息与新闻文本内容结合；Wang 等人 [7] 将新闻的文本内容与图像内容结合;Karimi 等人 [28] 将新闻内容与新闻的上下文结 合等。
+
+由于本文提出的模型也结合了新闻的文本内容与新闻的上下文内容，所以，本 文所提及的模型也属于混合模型。与之前工作不同的是，本文是首次将假新闻检 测和新闻的主题分类这两个任务结合起来，并取得了目前最优的性能。
+
+- 16 - 哈尔滨工业大学工学硕士学位论文
+
+第 3 章 多任务学习模型的设计与实现
+
+如图3-1是本文提出的多任务学习模型框架：FDML。FDML 可分为三层：
+
+• 嵌入层（Embedding Layer）：本层的主要目的是将文本内容以及上下文信 息嵌入到一个低维空间，对于文本内容中的每个词，将其嵌入为一个词向量；对 于上下文内容，将每个信息表示为一个低维向量，并在后续得训练中得以更新。
+
+• 表征层（Representation Layer）：本层的主要目的是接受嵌入层的输入，使 用深度神经网络抽取高阶特征，针对不同任务设计各自所需的特征，供多任务学 习层使用。
+
+• 多任务学习层（Multi-Task Learning Layer）：本层的主要目的是接受表征 层的高阶特征作为输入，使用神经网络分类器同时对两个任务进行优化。
+
+Embedding Layer Textual Information
+
+x x
+
+1
+
+2
+
+x
+
+T
+
+Contextual Information
+
+c c
+
+1
+
+2
+
+c
+
+N
+
+Representation Layer
+
+Multi-Task Layer Fake News Detection
+
+LSTM Layer
+
+h h
+
+1
+
+Pooling
+
+2
+
+FAKE!
+
+Text-CNN
+
+h
+
+T
+
+CNN
+
+TOPIC
+
+Contextual Vector
+
+Topic Classification
+
+图 3-1 多任务学习模型：FDML
+
+下面就这三层结构及其作用做详细介绍。
+
+3.1 嵌入层
+
+令 χ = {x 1 , x 2 ,. . ., x T } 表示新闻的文本内容， x i 表示一个词，T 表示文本的长 度，词嵌入可以表示为：
+
+′ i
+
+x = E · x i (3-1)  其中 x i ′ 即为词向量 x i ′ ∈ R d ，d 为嵌入的词向量的维度，E 为词向量矩阵。E
+
+- 17 -
+
+...
+
+... 哈尔滨工业大学工学硕士学位论文
+
+可以随机初始化，在整个训练过程中进行学习；也可以由其他训练好的词向量做 初始化，如 word2vec [17] ，Glove [30] ，fasttext [31] 等。
+
+同文本的特征表示一样，对于上下文信息，同样以嵌入（Embedding）的方式 获取对应的特征表示，考虑到不同的上下文信息所代表的领域不同，因此各个上 下文信息分别嵌入到不同的向量空间，通过随机初始化来获得上下文信息的初始 向量表示，在训练过程中更新此向量。
+
+3.2 表征层
+
+表征层的作用便是从嵌入层的输入中抽取高阶特征。如图3-1所示，本论文使 用 LSTM 和 CNN 对文本内容进行特征抽取。将抽取完的特征组合成各个人物所需 的任务送入多任务学习层进行分类器的训练。
+
+3.3 多任务学习层
+
+在表征层通过深度神经网络进行特征抽取后，获得了来自文本和上下文信息 的高阶特征表示。在多任务学习层，通过对特征的融合，对于新闻的真实性检测 以及新闻的主题分类这两个任务，可以分别获得相应的特征表示。然后，通过全 连接神经网络得到最终的预测结果：
+
+y
+
+′ m
+
+  = Softmax W m 2 · f W m 1 r m + b 1 + b 2 m m
+
+(3-2)
+
+′ 为任务 m 的最终特征表示，y m 即为任务 m 的预测结果。这里，令 m = 1 表 示新闻的真实性检测任务，m = 2 表示新闻的主题分类任务。
+
+r
+
+m
+
+模型的参数通过随机梯度下降进行更新，损失函数定义为： M Õ  ′ L = α m L y m , y m + λ∥Θ∥ 2 (3-3)
+
+m=1
+
+′ 其中 y m 为任务 m 的真实标签，y m 为分类器预测的标签；λ 为 L 2 正则化系数， α m 为任务 m 关于损失函数的权重；损失函数 L 采用交叉熵（Cross Entropy）。Θ 为 整个模型的参数。
+
+由于在学习过程中两个任务是相互影响的，因此，本课题设计的多任务深度 学习模型可以学习到两个任务的潜在关系，并提高这两个任务的性能表现。
+
+- 18 - 哈尔滨工业大学工学硕士学位论文
+
+第 4 章 模型验证及分析
+
+4.1 实验数据
+
+假新闻检测领域一直以来缺少一份公共数据集，2017 年，Wang [16] 公布了一 份较大的数据集，其中供包含了 12.8k 条新闻。除了新闻的文本内容外，此数据集 还提供了丰富的上下文信息，如作者、党派等，每条新闻均有一个人工审核的真 实性标签，其按照从假到真的程度，分为以下六种：Pants-Fire，False，Barely-True， Half-True，Mostly-True，True。此外，每条新闻均提供了详细的鉴定报告以供分析。 本论文基于此数据集来验证提出模型的有效性。
+
+表4-1给出了 LIAR [16] 数据集的一个简单示例。
+
+4.2 实验设置
+
+在处理新闻的主题标签时，本课题取前二〸个出现次数最多的主题作为新闻 的主题标签，其余的新闻则赋予 others 标签。因此，对假新闻检测任务而言，是一 个六分类问题；对新闻的主题分类任务而言，是一个二〸一分类问题（前二〸个 主题 +others 标签）。前 20 个主题如表4-2所示。
+
+实验相关参数设置如表4-3所示。
+
+论文提及到的模型实现全部基于深度学习框架 pytorch，代码使用 python 编 写。为了减小随机种子带来的误差，所有实验结果都是取随机〸次实验的平均结 果。显卡使用 NVIDIA Telsa V100。
+
+4.2.1 性能指标
+
+为了更全面的描述实验性能，本课题使用了如下的评价指标：
+
+表 4-1 LIAR 数据集举例
+
+新闻
+
+作者 工作职称 家乡 政党 历史信用 演讲地
+
+“The number of illegal immigrants could be 3 million. It could be 30 million.”
+
+Donald Trump President-Elect New York Republican (63,114,51,37,61,14) Phoenix, Arizona
+
+新闻主题 真实性
+
+Immigration Pants-ﬁre
+
+- 19 - 哈尔滨工业大学工学硕士学位论文
+
+表 4-2 前 20 个主题
+
+economy taxes children education
+
+health-care energy deﬁcit candidates-biography
+
+immigration abortion elections jobs
+
+federal-budget state-budget foreign-policy congress
+
+crime campaign-ﬁnance guns corrections-and-updates
+
+表 4-3 实验参数设置
+
+参数
+
+设置
+
+批大小（Batch size） 学习率 优化器 Dropout 动量（moumentum） L 2 正则系数 文本抽取器 CNN 卷积核 文本抽取器 CNN 卷积核数量 文本抽取器 LSTM 维度 上下文信息初始化 未登录词初始化
+
+128
+
+0.01 批随机梯度下降
+
+0.8
+
+0.8 1e-3 [2,3,4] 20 300 均匀分布 ∈ [−0.1,0.1] 均匀分布 ∈ [−0.1,0.1]
+
+• 准确率（Accuracy）：反应模型正确预测的比率； TP + TN Accuracy = TP + FP + FN + TN
+
+(4-1)
+
+• 精准率（Precision）：计算预测出来的某类样本中，有多少是被正确预测的； TP Precision = (4-2) TP + FP
+
+• 召回率（Recall）：针对原先实际样本而言，有多少样本被正确的预测出来
+
+了；
+
+TP
+
+Recall =
+
+(4-3)
+
+T + FN
+
+• F1 分数（F1 Score）：对精准率与召回率的加权平均：
+
+Precision ∗ Recall F1 = 2 ∗ Precision + Recall
+
+表4-4给出了关于 TP，FP，FN，TN 的相关解释。
+
+(4-4)
+
+表 4-4 关键词解释
+
+关键字
+
+评价指标
+
+解释
+
+TP FP FN TN
+
+True Positive False Positive False Negative True Negative
+
+真阳性：预测为正，实际为正 假阳性：预测为正，实际为负 假阴性：预测与负、实际为正 真阴性：预测为负、实际为负
+
+- 20 - 哈尔滨工业大学工学硕士学位论文
+
+4.2.2 假新闻检测对比方法
+
+为了更好的对比实验性能，本课题实现了若干对比方法，现对如下方法做简 要介绍：
+
+• Hybrid-CNN [16] ：Hybrid-CNN 使用 CNN 对新闻的文本内容进行特征抽取， 使用 LSTM 编码上下文信息，经过 Max-pooling 后使用 CNN 进行高阶特征抽取；
+
+• LSTM-Attention [27] ：新闻的上下文信息被用在两处：1. 在使用 LSTM 对文 本进行特征抽取时作为注意力因子赋予词不同权重 2. 使用另一个 LSTM 对上下文 进行编码作为另一个特征集；
+
+• MMFD [28] ：MMFD 使用 CNN-LSTM 分别对文本、上下文信息、真实性检 测报告等数据进行特征抽取，然后使用注意力机制将各个特征结合起来；
+
+• Memory-Network [32] ：使用 Memory Network 检测假新闻，新闻的上下文信 息作为注意力因子。
+
+4.2.3 主题分类对比方法
+
+本论文实现了如下主题分类模型作为对比：
+
+• RF：使用 TF-IDF 作为特征，随机森林（Random Forest）作为分类器；
+
+• Bi-LSTM [33] ：使用双向 LSTM 对新闻的文本内容进行特征提取，全连接神 经网络做分类器；
+
+• CNN [34] ：使用 CNN 作为文本特征抽取器，全连接神经网络做分类器；
+
+• SWEM [21] ：Simple Word-Embedding based Model 直接对词向量进行 Pooling， 后接全连接神经网络做分类器；
+
+• LEAM [35] ：Label Embedding Attentive Model 通过计算文本中的词语与标签 的相似度，给与每个词权重，然后对权重后的词向量进行 Pooling，后接全连接神 经网络做分类器。
+
+4.3 性能对比
+
+4.3.1 假新闻检测性能对比
+
+表4-5列出了各个模型在主题个数为二〸一个时假新闻检测的性能表现。可以 看到，除了 Precision 外，本课题提出的模型 FDML 在其他评价标准下均较其他 方法有较大的提升。得益于多任务学习机制以及对上下文信息的运用，FDML 模 型性能达到了最优。 具体地， 在所有的对比方法中，William Yang Wang 最早提 出的 Hybrid-CNN 性能最差，Macro F1 Score 仅有 0.260；Memory-Network 取得 了最好的结果，其 Accuracy 达到了 0.440，Macro F1 Score 达到了 0.432。相较于
+
+- 21 - 哈尔滨工业大学工学硕士学位论文
+
+Hybrid-CNN 模型，Memory-Network 在 Accuracy 和 Macro F1 Score 上分别获得了 12.7% 和 17.2% 的提升。本课题提出的模型在 Accuracy、Macro Recall 和 Macro F1 Score 上均大幅超过对比方法。比如，FDML 在整体性能指标 Macro F1 Score 上分别提升 25.7%，15.7%，9.1%，8.5%（相较于 Hybrid-CNN、LSTM-Attention、 MMFD、Memory-Network。 为了探究假新闻检测在不同数量主题下的性能，本课
+
+表 4-5 假新闻检测模型性能对比
+
+Model Name
+
+Label
+
+Precision
+
+Recall
+
+F1 Score
+
+Accuracy
+
+Macro-F1
+
+Hybrid-CNN
+
+Pants-ﬁre False Barely-True Half-True Mostly-True True
+
+0.600 0.045
+
+0.327 0.518
+
+0.266 0.155
+
+0.311 0.3411
+
+0.344 0.4780
+
+0.216 0.111
+
+0.085
+
+0.401
+
+0.196
+
+0.313
+
+0.260
+
+0.325
+
+0.400
+
+0.152
+
+LSTM-Attention
+
+Pants-ﬁre False Barely-True Half-True Mostly-True True
+
+0.409
+
+0.406
+
+0.382
+
+0.356
+
+0.421
+
+0.399
+
+0.274
+
+0.422
+
+0.325
+
+0.535
+
+0.436
+
+0.143
+
+0.328
+
+0.413
+
+0.351
+
+0.375
+
+0.360
+
+0.427
+
+0.428
+
+0.210
+
+MMFD
+
+Pants-ﬁre False Barely-True Half-True Mostly-True True
+
+0.706
+
+0.394
+
+0.611
+
+0.374
+
+0.418
+
+0.867
+
+0.416
+
+0.586
+
+0.279
+
+0.547
+
+0.522
+
+0.159
+
+0.524
+
+0.471
+
+0.383
+
+0.432
+
+0.426
+
+0.444
+
+0.464
+
+0.269
+
+Memory-Network
+
+Pants-ﬁre False Barely-True Half-True Mostly-True True
+
+0.668
+
+0.468
+
+0.468
+
+0.403
+
+0.366
+
+0.905
+
+0.434
+
+0.507
+
+0.351
+
+0.532
+
+0.588
+
+0.157
+
+0.526
+
+0.487
+
+0.402
+
+0.440
+
+0.432
+
+0.458
+
+0.451
+
+0.267
+
+FDML
+
+Pants-ﬁre False Barely-True Half-True Mostly-True True
+
+0.629
+
+0.468
+
+0.503
+
+0.487
+
+0.503
+
+0.557
+
+0.590
+
+0.568
+
+0.406
+
+0.472
+
+0.555
+
+0.489
+
+0.609
+
+0.513
+
+0.449
+
+0.507
+
+0.517
+
+0.479
+
+0.527
+
+0.521
+
+题完成了在不同主题数量下各个模型的实验。如图4-1所示，横轴表示不同的主题 数量，如 2 表示仅含有两个主题，21 则表示包含所有主题，也即对应表4-5列出的 结果。同表4-5一样，为了更全面的探究各个模型的性能，图 2-6 画出了各个模型 在 Accuracy、Macro Precision、Macro Recall 和 Macro F1 Score 上的表现。图4-1中
+
+- 22 - 哈尔滨工业大学工学硕士学位论文
+
+在各个子图上方标记了各个子图所表示的性能指标。 从表4-5中可以看到，FDML 在 Macro Precision 这一指标下性能不如 MMFD 和 Memory-Network。其中，Memory-Network 在 Pants-ﬁre 和 True 类上的 Precision 较高。然而，其 Recall 都相对较低。比如在类别 True 上，虽然 Precision 达到了 0.905，但其 Recall 非常低，仅有 0.157。而 FDML 虽然 Precision 仅有 0.557，但由 于其较高的 Recall 0.489，所以 F1 Score 相较于 Memory-Network 获得了 25.4% 的 提升。
+
+Hybrid-CNN Accuracy
+
+LSTM-Attention
+
+MMFD
+
+Memory-Network Macro-F1
+
+FDML
+
+0.50
+
+0.45
+
+0.40
+
+0.35
+
+0.30
+
+0.25
+
+0.50
+
+0.45
+
+0.40
+
+0.35
+
+0.30
+
+0.25
+
+0.20
+
+2
+
+4
+
+6
+
+8
+
+10 12 14 Number of Topics
+
+16
+
+18
+
+2021
+
+2
+
+4
+
+6
+
+8
+
+10 12 14 Number of Topics
+
+16
+
+18
+
+2021
+
+图 4-1 假新闻检测性能比较：Topic 2 至 Topic21
+
+4.3.2 主题分类性能对比
+
+表4-6展示了详细的性能对比结果。可以看出，随着主题数量的增多，各个模 型的性能均呈下降趋势，因为任务变得相对困难。基于 TF-IDF 的方法 RF 表现最 差，因为其离散的词表达方式无法编码语义信息，而这对主题分类是〸分重要的。 本课题提出的模型 FDML 在各个 Topic 数目上都表现较佳，特别是当任务变得困 难时（Topic 数目变多），FDML 与其他模型的性能进一步拉大。
+
+图4-2展示了在不同主题数量下主题分类的性能比较。
+
+为了探究本论文提出多任务学习模型的有效性，本论文基于 FDML 构建了一 个新的模型：FDML-。FDML-是 FDML 的一个变形，相较于 FDML，FDML-是 一个单任务模型，即仅优化假新闻检测这一个任务，主题分类的相关部分被去除。 图4-3展示了 FDML-和 FDML 在 Accuracy 和 Macro F1 上的相应表现。得益于有 效的特征抽取与特征融合，FDML 和 FDML-均达到了较好的性能，在 Accuracy 和 Macro F1 Score 下，FDML 在不同主题数量下均优于 FDML-。得益于多任务学习 机制，FDML 能够捕捉新闻主题和新闻真实性的关系，从而进一步提升实验效果。
+
+- 23 - 哈尔滨工业大学工学硕士学位论文
+
+表 4-6 主题分类性能比较：Topic2 至 Topic 21
+
+K
+
+2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 Avg.
+
+RF
+
+0.911
+
+0.798
+
+0.778
+
+0.717
+
+0.670
+
+0.667
+
+0.662
+
+0.670
+
+0.655
+
+0.647
+
+0.637
+
+0.618
+
+0.590
+
+0.581
+
+0.577
+
+0.568
+
+0.560
+
+0.553
+
+0.534
+
+0.525
+
+0.646
+
+4
+
+Bi-LSTM
+
+0.942
+
+0.879
+
+0.865
+
+0.818
+
+0.768
+
+0.757
+
+0.742
+
+0.741
+
+0.717
+
+0.712
+
+0.713
+
+0.692
+
+0.658
+
+0.654
+
+0.644
+
+0.633
+
+0.625
+
+0.611
+
+0.604
+
+0.555
+
+0.716
+
+Accuracy CNN SWEM
+
+0.925 0.929
+
+0.861 0.845
+
+0.849 0.840
+
+0.810 0.792
+
+0.767 0.744
+
+0.751 0.735
+
+0.741 0.731
+
+0.744 0.731
+
+0.720 0.707
+
+0.713 0.705
+
+0.712 0.703
+
+0.685 0.673
+
+0.654 0.643
+
+0.653 0.639
+
+0.647 0.630
+
+0.637 0.618
+
+0.630 0.612
+
+0.615 0.597
+
+0.601 0.583
+
+0.559 0.548
+
+0.714 0.700
+
+RF Accuracy
+
+Bi-LSTM
+
+LEAM
+
+0.944
+
+0.831
+
+0.835
+
+0.797
+
+0.760
+
+0.752
+
+0.728
+
+0.735
+
+0.718
+
+0.715
+
+0.714
+
+0.687
+
+0.658
+
+0.646
+
+0.640
+
+0.629
+
+0.615
+
+0.603
+
+0.593
+
+0.552
+
+0.708
+
+FDML
+
+RF
+
+Bi-LSTM
+
+0.942
+
+0.871
+
+0.862
+
+0.806
+
+0.763
+
+0.752
+
+0.740
+
+0.740
+
+0.714
+
+0.709
+
+0.719
+
+0.695
+
+0.641
+
+0.642
+
+0.621
+
+0.605
+
+0.593
+
+0.559
+
+0.531
+
+0.481
+
+0.699
+
+Macro-F1 CNN SWEM
+
+0.925
+
+0.929
+
+0.853
+
+0.836
+
+0.846
+
+0.836
+
+0.799
+
+0.783
+
+0.762
+
+0.739
+
+0.746
+
+0.732
+
+0.738
+
+0.730
+
+0.739
+
+0.748
+
+0.717
+
+0.709
+
+0.709
+
+0.707
+
+0.719
+
+0.713
+
+0.689
+
+0.679
+
+0.638
+
+0.631
+
+0.642
+
+0.630
+
+0.630
+
+0.613
+
+0.615
+
+0.590
+
+0.601
+
+0.586
+
+0.568
+
+0.550
+
+0.532
+
+0.514
+
+0.475
+
+0.448
+
+0.698
+
+0.685
+
+LEAM
+
+FDML
+
+Macro-F1
+
+LEAM
+
+0.944
+
+0.818
+
+0.831
+
+0.786
+
+0.753
+
+0.750
+
+0.726
+
+0.741
+
+0.722
+
+0.717
+
+0.724
+
+0.690
+
+0.642
+
+0.634
+
+0.622
+
+0.604
+
+0.584
+
+0.560
+
+0.526
+
+0.482
+
+0.693
+
+FDML
+
+0.945 0.911
+
+0.876 0.786
+
+0.860 0.776
+
+0.827 0.707
+
+0.766 0.664
+
+0.763 0.666
+
+0.743 0.665
+
+0.743 0.681
+
+0.730 0.658
+
+0.725 0.649
+
+0.718 0.653
+
+0.710 0.628
+
+0.681 0.580
+
+0.680 0.572
+
+0.668 0.566
+
+0.653 0.545
+
+0.649 0.538
+
+0.632 0.521
+
+0.624 0.485
+
+0.580 0.430
+
+0.729 0.634
+
+CNN
+
+SWEM
+
+0.945
+
+0.867
+
+0.855
+
+0.816
+
+0.761
+
+0.757
+
+0.740
+
+0.743
+
+0.727
+
+0.726
+
+0.727
+
+0.716
+
+0.679
+
+0.679
+
+0.661
+
+0.634
+
+0.626
+
+0.587
+
+0.557
+
+0.514
+
+0.716
+
+0.9
+
+0.8
+
+0.7
+
+0.6
+
+0.9
+
+0.8
+
+0.7
+
+0.6
+
+0.5
+
+2
+
+6
+
+8
+
+10 12 14 16 18 2021 2 4 6 8 10 12 14 Number of Topics Number of Topics 图 4-2 主题分类性能比较：Topic 2 至 Topic21
+
+- 24 -
+
+16
+
+18
+
+2021 哈尔滨工业大学工学硕士学位论文
+
+FDML-
+
+FDML
+
+Accuracy
+
+Macro-F1
+
+0.52
+
+0.50
+
+0.48
+
+0.46
+
+0.44
+
+0.52
+
+0.50
+
+0.48
+
+0.46
+
+0.44
+
+2
+
+4
+
+6
+
+8
+
+10 12 14 16 18 2021 2 4 6 Number of Topics 图 4-3 FDML 和 FDML-的性能比较
+
+8
+
+10 12 14 Number of Topics
+
+16
+
+18
+
+2021
+
+- 25 - 哈尔滨工业大学工学硕士学位论文
+
+结
+
+论
+
+学位论文的结论作为论文正文的最后一章单独排写，但不加章标题序号。 结论应是作者在学位论文研究过程中所取得的创新性成果的概要总结，不能 与摘要混为一谈。博士学位论文结论应包括论文的主要结果、创新点、展望三部 分，在结论中应概括论文的核心观点，明确、客观地指出本研究内容的创新性成果 （含新见解、新观点、方法创新、技术创新、理论创新），并指出今后进一步在本研 究方向进行研究工作的展望与设想。对所取得的创新性成果应注意从定性和定量 两方面给出科学、准确的评价，分（1）、（2）、（3）…条列出，宜用“提出了”、“建立 了”等词叙述。
+
+- 26 - 哈尔滨工业大学工学硕士学位论文
+
+参考文献
+
+[1] Gottfried J, Shearer E. News Use Across Social Medial Platforms 2016[M]. [S.l.] :
+
+Pew Research Center, 2016.
+
+[2] Shu K, Sliva A, Wang S, et al. Fake news detection on social media: A data mining perspective[J]. ACM SIGKDD Explorations Newsletter, 2017, 19(1) : 22-36.
+
+[3] Allcott H, Gentzkow M. Social media and fake news in the 2016 election[J]. Journal of economic perspectives, 2017, 31(2) : 211-36.
+
+[4] Castillo C, Mendoza M, Poblete B. Information credibility on twitter[C] // Proceedings of the 20th international conference on World wide web. 2011 : 675-
+
+684.
+
+[5] Kwon S, Cha M, Jung K, et al. Prominent features of rumor propagation in online social media[C] // 2013 IEEE 13th International Conference on Data Mining. 2013 : 1103-1108.
+
+[6] Jin Z, Cao J, Guo H, et al. Multimodal fusion with recurrent neural networks for rumor detection on microblogs[C] // Proceedings of the 25th ACM international conference on Multimedia. 2017 : 795-816.
+
+[7] Wang Y, Ma F, Jin Z, et al. Eann: Event adversarial neural networks for multi-modal fake news detection[C] // Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2018 : 849-857.
+
+[8] Ma J, Gao W, Mitra P, et al. Detecting rumors from microblogs with recurrent neural networks.[C] // Ijcai. 2016 : 3818-3824.
+
+[9] Liu Y, Wu Y-F B. Early detection of fake news on social media through propagation path classiﬁcation with recurrent and convolutional networks[C] // Thirty-Second AAAI Conference on Artiﬁcial Intelligence. 2018.
+
+[10] Ma J, Gao W, Wong K-F. Detect rumor and stance jointly by neural multi-task learning[C] // Companion of the The Web Conference 2018 on The Web Conference 2018. 2018 : 585-593.
+
+[11] Yang F, Liu Y, Yu X, et al. Automatic detection of rumor on Sina Weibo[C] // Proceedings of the ACM SIGKDD Workshop on Mining Data Semantics. 2012 :
+
+13.
+
+- 27 - 哈尔滨工业大学工学硕士学位论文
+
+[12] 程亮, 邱云飞, 孙鲁. 微博谣言检测方法研究[D]. [S.l.] : [s.n.], 2013.
+
+[13] Wu K, Yang S, Zhu K Q. False rumors detection on sina weibo by propagation structures[C] // 2015 IEEE 31st international conference on data engineering. 2015 : 651-662.
+
+[14] Sun S, Liu H, He J, et al. Detecting event rumors on sina weibo automatically[C] // Asia-Paciﬁc Web Conference. 2013 : 120-131.
+
+[15] 毛二松, 陈刚, 刘欣, et al. 基于深层特征和集成分类器的微博谣言检测研究[J].
+
+计算机应用研究, 2016, 33(11) : 3369-3373.
+
+[16] Wang W Y. " liar, liar pants on ﬁre": A new benchmark dataset for fake news detection[J]. arXiv preprint arXiv:1705.00648, 2017.
+
+[17] Mikolov T, Sutskever I, Chen K, et al. Distributed representations of words and phrases and their compositionality[C] // Advances in neural information processing systems. 2013 : 3111-3119.
+
+[18] Peters M E, Neumann M, Iyyer M, et al. Deep contextualized word representations[J].
+
+arXiv preprint arXiv:1802.05365, 2018.
+
+[19] Radford A, Narasimhan K, Salimans T, et al. Improving language understanding by generative pre-training[J]. URL https://s3-us-west-2. amazonaws. com/openaiassets/researchcovers/languageunsupervised/language understanding paper. pdf, 2018.
+
+[20] Devlin J, Chang M-W, Lee K, et al. Bert: Pre-training of deep bidirectional transformers for language understanding[J]. arXiv preprint arXiv:1810.04805, 2018.
+
+[21] Shen D, Wang G, Wang W, et al. Baseline needs more love: On simple wordembedding-based models and associated pooling mechanisms[J]. arXiv preprint arXiv:1805.09843, 2018.
+
+[22] Elman J L. Finding structure in time[J]. Cognitive science, 1990, 14(2) : 179-211.
+
+[23] Chung J, Gulcehre C, Cho K, et al. Empirical evaluation of gated recurrent neural networks on sequence modeling[J]. arXiv preprint arXiv:1412.3555, 2014.
+
+[24] Mnih V, Heess N, Graves A, et al. Recurrent models of visual attention[C] // Advances in neural information processing systems. 2014 : 2204-2212.
+
+[25] Bahdanau D, Cho K, Bengio Y. Neural machine translation by jointly learning to align and translate[J]. arXiv preprint arXiv:1409.0473, 2014.
+
+[26] Vaswani A, Shazeer N, Parmar N, et al. Attention is all you need[C] // Advances in neural information processing systems. 2017 : 5998-6008.
+
+- 28 - 哈尔滨工业大学工学硕士学位论文
+
+[27] Long Y, Lu Q, Xiang R, et al. Fake news detection through multi-perspective speaker proﬁles[C] // Proceedings of the Eighth International Joint Conference on Natural Language Processing (Volume 2: Short Papers). 2017 : 252-256.
+
+[28] Karimi H, Roy P, Saba-Sadiya S, et al. Multi-source multi-class fake news detection[C] // Proceedings of the 27th International Conference on Computational Linguistics. 2018 : 1546-1557.
+
+[29] Ruchansky N, Seo S, Liu Y. Csi: A hybrid deep model for fake news detection[C] // Proceedings of the 2017 ACM on Conference on Information and Knowledge Management. 2017 : 797-806.
+
+[30] Pennington J, Socher R, Manning C. Glove: Global vectors for word representation[C] // Proceedings of the 2014 conference on empirical methods in natural language processing (EMNLP). 2014 : 1532-1543.
+
+[31] Bojanowski P, Grave E, Joulin A, et al. Enriching word vectors with subword information[J]. Transactions of the Association for Computational Linguistics, 2017, 5 : 135-146.
+
+[32] Pham T T. A Study on Deep Learning for Fake News Detection[J], 2018.
+
+[33] Graves A, Schmidhuber J. Framewise phoneme classiﬁcation with bidirectional LSTM and other neural network architectures[J]. Neural networks, 2005, 18(5-6) : 602-610.
+
+[34] Kim Y. Convolutional neural networks for sentence classiﬁcation[J]. arXiv preprint arXiv:1408.5882, 2014.
+
+[35] Wang G, Li C, Wang W, et al. Joint embedding of words and labels for text classiﬁcation[J]. arXiv preprint arXiv:1805.04174, 2018.
+
+- 29 - 哈尔滨工业大学工学硕士学位论文
+
+攻读硕士学位期间发表的论文及其他成果
+
+（一）发表的学术论文
+
+[1] XXX，XXX. Static Oxidation Model of Al-Mg/C Dissipation Thermal Protection Materials[J]. Rare Metal Materials and Engineering, 2010, 39(Suppl. 1): 520-524.
+
+（SCI 收录，IDS 号为 669JS，IF=0.16）
+
+[2] XXX，XXX. 精密超声振动切削单晶铜的计算机仿真研究 [J]. 系统仿真学报， 2007，19（4）：738-741，753.（EI 收录号：20071310514841）
+
+[3] XXX，XXX. 局部多孔质气体静压轴向轴承静态特性的数值求解 [J]. 摩擦学学 报，2007（1）：68-72.（EI 收录号：20071510544816）
+
+[4] XXX，XXX. 硬脆光学晶体材料超精密切削理论研究综述 [J]. 机械工程学报， 2003，39（8）：15-22.（EI 收录号：2004088028875）
+
+[5] XXX，XXX. 基于遗传算法的超精密切削加工表面粗糙度预测模型的参数辨识 以及切削参数优化 [J]. 机械工程学报，2005，41（11）：158-162.（EI 收录号： 2006039650087）
+
+[6] XXX，XXX. Discrete Sliding Mode Cintrok with Fuzzy Adaptive Reaching Law on 6-PEES Parallel Robot[C]. Intelligent System Design and Applications, Jinan, 2006: 649-652.（EI 收录号：20073210746529） （二）申请及已获得的专利（无专利时此项不必列出）
+
+[1] XXX，XXX. 一种温热外敷药制备方案：中国，88105607.3[P]. 1989-07-26. （三）参与的科研项目及获奖情况
+
+[1] XXX，XXX. XX 气体静压轴承技术研究, XX 省自然科学基金项目. 课题编号： XXXX.
+
+[2] XXX，XXX. XX 静载下预应力混凝土房屋结构设计统一理论. 黑江省科学技 术二等奖, 2007.
+
+- 30 - 哈尔滨工业大学工学硕士学位论文
+
+哈尔滨工业大学学位论文原创性声明和使用权限
+
+学位论文原创性声明
+
+本人郑重声明：此处所提交的学位论文《基于多任务深度学习的假新闻检测》， 是本人在导师指导下，在哈尔滨工业大学攻读学位期间独立进行研究工作所取得 的成果，且学位论文中除已标注引用文献的部分外不包含他人完成或已发表的研 究成果。对本学位论文的研究工作做出重要贡献的个人和集体，均已在文中以明 确方式注明。
+
+作者签名：
+
+日期：
+
+年
+
+月
+
+日
+
+学位论文使用权限
+
+学位论文是研究生在哈尔滨工业大学攻读学位期间完成的成果，知识产权归 属哈尔滨工业大学。学位论文的使用权限如下：
+
+（1）学校可以采用影印、缩印或其他复制手段保存研究生上交的学位论文，并 向国家图书馆报送学位论文；（2）学校可以将学位论文部分或全部内容编入有关 数据库进行检索和提供相应阅览服务；（3）研究生毕业后发表与此学位论文研究 成果相关的学术论文和其他成果时，应征得导师同意，且第一署名单位为哈尔滨 工业大学。
+
+保密论文在保密期内遵守有关保密规定，解密后适用于此使用权限规定。
+
+本人知悉学位论文的使用权限，并将遵守有关规定。
+
+作者签名：
+
+导师签名：
+
+日期：
+
+日期：
+
+年
+
+年
+
+月
+
+月
+
+日
+
+日
+
+- 31 - 哈尔滨工业大学工学硕士学位论文
+
+致
+
+谢
+
+衷心感谢导师 XXX 教授对本人的精心指导。他的言传身教将使我终生受益。 ……
+
+A 感谢哈工大 LT E X 论文模板 hiThesis !
+
+- 32 -

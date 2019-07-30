@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>全文搜索</title>
+    <style>
+        body {
+            font-family: "Hiragino Sans GB", sans-serif;
+            font-size: 0.9em;
+            margin-left: 100px;
+        }
+
+        p {
+            line-height: 150%;
+        }
+
+        #query {
+            width: 400px;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            padding: 0px;
+            width: 800px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h2>全文搜索</h2>
+        <p><input type="text" id="query" v-model="query"></p>
+        <div>
+            <div v-for="d in docs">
+                <p>[[d.Path]]</p>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<!-- <script type="text/javascript" src="jquery.min.js"></script> -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+
+    new Vue({
+        el: '#app',
+        delimiters: ['[[', ']]'],
+        data: {
+            message: 'Hello Vue!',
+            query: "",
+            docs: [],
+
+        },
+        watch: {
+            // 如果 `question` 发生改变，这个函数就会运行
+            query: function (newQuestion, oldQuestion) {
+                // var query = $('input#query').val();
+                var query = this.query;
+                if (query.length == 0) {
+                    this.docs = [];
+                    return
+                }
+                _t = this;
+                $.ajax({
+                    url: "/search",
+                    type: "GET",
+                    data: {
+                        query: query
+                    },
+                    dataType: "json",
+                    success: function (result) {
+                        if (result.docs == null) {
+                            return
+                        }
+                        _t.docs = result.docs
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        alert(xhr.status);
+                        alert(thrownError);
+                    }
+                });
+            }
+        }
+    })
+    function timeConverter(UNIX_timestamp) {
+        var d = new Date(UNIX_timestamp * 1000);
+
+        var year = d.getFullYear();
+        var month = d.getMonth() + 1;
+        var date = d.getDate();
+        var hour = d.getHours();
+        var min = d.getMinutes();
+        var sec = d.getSeconds();
+        var time = year + '/' + month + '/' + date + ' ' + hour + ':' + min + ':' + sec;
+
+        return time;
+    }
+
+    search = function () {
+        var query = $('input#query').val();
+        if (query.length == 0) {
+            return
+        }
+        $.ajax({
+            url: "/search",
+            type: "GET",
+            data: {
+                query: query
+            },
+            dataType: "json",
+            success: function (result) {
+                if (result.docs == null) {
+                    return
+                }
+                var out = "<table border=0>"
+                var weibos = new Array();
+
+
+                for (var i = 0; i < result.docs.length; i++) {
+                    weibos.push(result.docs[i]);
+                }
+
+                for (var i = 0; i < weibos.length; i++) {
+                    out += "<tr>"
+                    out += "<td width=150px>";
+                    out += weibos[i].Path;
+                    out += "<br>"
+                    out += "time";
+                    out += "<br>"
+                    out += "</td>";
+                    out += "<td>";
+                    out += "<p>" + weibos[i].Content + "</p>";
+                    out += "</td>";
+                    out += "</tr>";
+                }
+                out += "</table>"
+                $('div#output').html(out);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+    };
+</script>
+
+</html>

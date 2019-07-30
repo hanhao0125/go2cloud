@@ -2,29 +2,64 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net"
 	"os"
+	"time"
 )
 
-func sendFile(path string, conn net.Conn) {
-	defer conn.Close()
-	fs, err := os.Open(path)
-	defer fs.Close()
+func init() {
+	log.SetPrefix("[CLIENT]")
+	log.SetFlags(log.LstdFlags | log.Lshortfile | log.LUTC)
+}
+
+func singleFile(path string) {
+	info, err := os.Stat(path)
 	if err != nil {
-		fmt.Println("os.Open err = ", err)
+		fmt.Println("os.Stat err = ", err)
 		return
 	}
-	buf := make([]byte, 1024*10)
-	for {
-		//  打开之后读取文件
-		n, err1 := fs.Read(buf)
-		if err1 != nil {
-			fmt.Println("fs.Open err = ", err1)
-			return
-		}
+	// 发送文件名
+	conn, err1 := net.Dial("tcp", "localhost:8888")
+	defer conn.Close()
+	if err1 != nil {
+		fmt.Println("net.Dial err = ", err1)
+		return
+	}
+	conn.Write([]byte(info.Name()))
+	// 接受到是不是ok
+	buf := make([]byte, 1024)
+	n, err2 := conn.Read(buf)
+	if err2 != nil {
+		fmt.Println("conn.Read err = ", err2)
+		return
+	}
+	if "ok" == string(buf[:n]) {
+		fmt.Println("成功")
+		sendFile(path, conn)
+	}
+	// 如果是ok,那么开启一个连接,发送文件
+}
+func testMultiFiles() {
+	defer timeCost(time.Now())
+	listFile("/Users/hanhao/Documents/Master-Paper")
 
-		//  发送文件
-		conn.Write(buf[:n])
+}
+func timeCost(start time.Time) {
+	tc := time.Since(start)
+	fmt.Printf("time cost = %v\n", tc)
+}
+func listFile(folder string) {
+	//specify the current dir
+	files, _ := ioutil.ReadDir(folder)
+	for _, file := range files {
+		if file.IsDir() {
+			listFile(folder + "/" + file.Name())
+		} else {
+			// log.Println(folder + "/" + file.Name())
+			singleFile(folder + "/" + file.Name())
+		}
 	}
 
 }
@@ -63,5 +98,5 @@ func TestClient() {
 	}
 }
 func main() {
-	TestClient()
+	StartWatchServer("/Users/hanhao/Documents/Master-Paper/")
 }
