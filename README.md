@@ -1,3 +1,4 @@
-# Step
-1. first run server.go
-2. run client.go in another terniaml
+# netdisc powered by Go 
+* Sync your files to remote server.
+* Use ResNet-101 to tag image.
+* riot as  full text search engine.

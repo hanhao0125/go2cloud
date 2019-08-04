@@ -97,6 +97,7 @@ func TestClient() {
 		// 如果是ok,那么开启一个连接,发送文件
 	}
 }
-func main() {
-	StartWatchServer("/Users/hanhao/Documents/Master-Paper/")
-}
+
+// func main() {
+// 	StartWatchServer("/Users/hanhao/Documents/Master-Paper/")
+// }

@@ -1,5 +1,5 @@
 import nsq
-from model import predict
+from resnet_model import predict
 
 import datetime
 from sqlalchemy import Column, String, create_engine, Integer, DATETIME
@@ -7,6 +7,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
+engine = create_engine('mysql+pymysql://root:root@localhost:3306/cloud')
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
 
 
 class Image(Base):
@@ -20,17 +23,6 @@ class Image(Base):
 
     def __str__(self):
         return f"{self.id}\t {self.path}"
-
-
-engine = create_engine('mysql+pymysql://root:root@localhost:3306/cloud')
-DBSession = sessionmaker(bind=engine)
-session = DBSession()
-
-
-def sql():
-    s = session.query(Image).all()
-    for i in s:
-        print(i)
 
 
 def handler(message):

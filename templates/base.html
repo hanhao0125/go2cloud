@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+
+<head>
+    <link rel="icon" href="http://localhost:9205/static/timg.png" type="image/x-icon" />
+    <style type="text/css">
+        #menu-item {
+            font-size: 18px;
+            font-weight: bolder
+        }
+
+        body {
+            background-color: rgb(238, 238, 238);
+            margin: 0 0 0 0;
+        }
+
+        #link {
+            font-size: 16px;
+            color: blue
+        }
+
+        #file {
+            font-size: 16px;
+            color: black
+        }
+
+        #info {
+            font-size: 14px;
+            color: gray
+        }
+
+        #dir {
+            font-size: 16px;
+            color: blue
+        }
+
+        .user-info {
+            font-size: 2px;
+            float: right;
+            font-weight: lighter;
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+    <title>index</title>
+</head>
+
+<body>
+    <div id="app">
+
+        <div id="content" style="margin-bottom: 10px">
+            <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect" background-color="#155B88"
+                text-color="#fff" active-text-color="#FF7E00" style="margin: 0 0 0 0">
+                <el-row type="flex" justify="center">
+                    <el-menu-item index="/" id="menu-item">Browser</el-menu-item>
+                    <el-menu-item index="#" style="float: right" id="menu-item">Upload Center</el-menu-item>
+                    <el-menu-item index="#" style="float: right" id="menu-item">Search</el-menu-item>
+                    <el-menu-item index="#" class="user-info">Welcome，</el-menu-item>
+                    <el-menu-item index="#" style="float: right" id="menu-item">Login</el-menu-item>
+                    </el-menu-item>
+                </el-row>
+            </el-menu>
+        </div>
+
+    </div>
+    <div id="main">
+        <el-table :data="tableData" style="width: 90%;margin-left: 100px;margin-right: 100px;">
+            <el-table-column label="" width="50">
+                <div slot-scope="scope">
+
+                    <el-image style="width: 20px; height: 20px" :src="'/static'+scope.row.finalPath"
+                        v-if="scope.row.fileType == 'image'" :preview-src-list="generateArray(scope.row.finalPath)">
+                    </el-image>
+                    <el-image style="width: 20px; height: 20px" src="/logo/file.png" v-if="scope.row.fileType =='dir'">
+                    </el-image>
+
+                    <el-image style="width: 20px; height: 20px" src="/logo/pdf.png" v-if="scope.row.fileType=='pdf'">
+                    </el-image>
+                    <el-image style="width: 20px; height: 20px" src="/logo/code.png" v-if="scope.row.fileType=='code'">
+                    </el-image>
+                    <el-image style="width: 20px; height: 20px" src="/logo/code.png" v-if="scope.row.fileType=='text'">
+                    </el-image>
+                </div>
+            </el-table-column>
+            <el-table-column label="Path" width="550" sortable>
+                <div slot-scope="scope">
+                    <el-link icon="el-icon-folder-opened" @click="getPaths(scope.row.id)" id="dir"
+                        v-if="scope.row.fileType =='dir'">
+                        [[ scope.row.path ]]
+                    </el-link>
+                    <el-link icon="el-icon-document" id="file" :href="'/edit?pid='+scope.row.id"
+                        v-if="scope.row.fileType != 'dir'">
+                        [[ scope.row.path ]]
+                    </el-link>
+                </div>
+            </el-table-column>
+
+            <el-table-column prop="fileSize" label="Size" width="200" sortable>
+                <div slot-scope="scope" id="info">
+                    [[ formatterSize(scope.row.fileSize) ]]
+                </div>
+            </el-table-column>
+            <el-table-column prop="share" label="Share" width="100" sortable>
+                <div slot-scope="scope" id="info">
+                    [[ formatterShare(scope.row.share) ]]
+                </div>
+            </el-table-column>
+            <el-table-column prop="modTime" label="Last Modify Time" width="300" sortable>
+                <div slot-scope="scope" id="info">
+                    [[ scope.row.modTime ]]
+                </div>
+            </el-table-column>
+        </el-table>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+
+<script>
+
+    var app = new Vue({
+        delimiters: ['[[ ', ' ]]'],
+        el: '#app',
+        data: {
+            activeIndex: '/'
+        },
+        methods: {
+
+            handleSelect: function (key, keyPath) {
+                if (key === '#' || key === '/') {
+                    this.activeIndex = '/';
+                    window.location.href = '/'
+                }
+            }
+        },
+        created: function () {
+        }
+    })
+    var main = new Vue({
+        el: '#main',
+        delimiters: ['[[ ', ' ]]'],
+        data: {
+            activeIndex: '/',
+            paths: [],
+            tableData: []
+        },
+        methods: {
+            generateArray: function (p) {
+                return ["/static" + p]
+            },
+            formatterShare: function (share) {
+                if (share == 0) {
+                    return "专用"
+                } else return "公开"
+            },
+            formatterSize: function (size) {
+                if (size == 0) {
+                    return "-"
+                }
+                if (size > 1024) {
+                    return (size / 1024).toFixed(2) + " KB"
+                }
+            },
+            getPaths: function (p) {
+                _t = this
+                axios
+                    .get('/files?p=' + p)
+                    .then(function (response) {
+                        _t.tableData = []
+                        d = response.data.f
+                        for (i = 0; i < d.length; i++) {
+                            _t.tableData.push({
+                                "id": d[i].Id,
+                                "type": d[i].Type,
+                                "path": d[i].Path,
+                                "parentDir": d[i].ParentDir,
+                                "parentId": d[i].ParentId,
+                                "fileSize": d[i].FileSize,
+                                "share": d[i].Share,
+                                "modTime": d[i].ModTime,
+                                "fileType": d[i].FileType,
+                                "finalPath": d[i].ParentDir + d[i].Path
+                            })
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
+        },
+        created: function () {
+            this.getPaths(0)
+
+        }
+    })
+</script>
+
+</html>

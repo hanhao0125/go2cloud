@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>ACE in Action</title>
+    <style type="text/css" media="screen">
+        #editor {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body>
+    fuck
+    <div id="app">
+
+        {{ .path }}
+        <a href="http://localhost:9205/static/1.pdf">abcd</a>
+    </div>
+    <div id="main">
+
+    </div>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+
+<script>
+
+    var app = new Vue({
+
+        delimiters: ['[[ ', ' ]]'],
+        el: '#app',
+        data: {
+            activeIndex: '/'
+        },
+        methods: {
+
+            handleSelect: function (key, keyPath) {
+                if (key === 'm/myCollection') {
+                    this.activeIndex = 'm/myCollection';
+                    window.location.href = '/m/my_collection'
+                }
+                else if (key === "b/userManage") {
+                    this.activeIndex = 'b/userManage';
+                    window.location.href = '/b/user_manage'
+                } else if (key === 'm/myRecommend') {
+                    window.location.href = '/m/my_recommend'
+                }
+                else if (key === "f/infoStatistics") {
+                    this.activeIndex = 'f/infoStatistics';
+                    window.location.href = '/f/st'
+
+                }
+
+                else if (key === 'b/movieManage') {
+                    this.activeIndex = 'b/movieManage';
+                    window.location.href = '/b/movie_manage'
+
+                } else if (key === 'f/qa') {
+                    this.activeIndex = 'f/qa';
+                    window.location.href = '/f/qa'
+                }
+
+                else if (key === 'm/movieIndex') {
+                    this.activeIndex = 'm/movieIndex';
+                    window.location.href = '/m/movie_index'
+
+                }
+
+                else if (key === 'f/gb') {
+                    this.activeIndex = 'f/gb';
+                    window.location.href = '/f/gb';
+
+                }
+
+                else if (key === 'f/news') {
+                    this.activeIndex = 'f/news';
+                    window.location.href = '/f/nw';
+                }
+                else if (key === 'u/logout') {
+                    this.activeIndex = 'u/logout';
+                    window.location.href = '/u/logout'
+                } else if (key === 'u/login') {
+                    this.activeIndex = '/u/login';
+                    window.location.href = '/u/login'
+                } else if (key === 'b/recommendSetting') {
+                    window.location.href = '/b/re_setting'
+                } else if (key === 'u/userInfo') {
+                    window.location.href = '/u/user_info'
+                }
+            }
+        },
+        created: function () {
+        }
+    })
+    var main = new Vue({
+        el: '#main',
+        delimiters: ['[[ ', ' ]]'],
+        data: {
+            activeIndex: 'm/movieIndex',
+            paths: [],
+        },
+        methods: {
+            getPaths: function (p) {
+                _t = this
+                axios
+                    .get('/files?p=' + p)
+                    .then(function (response) {
+                        _t.paths = response.data.f
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+            },
+        },
+        created: function () {
+            this.getPaths("")
+
+        }
+    })
+</script>
+
+</html>

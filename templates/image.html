@@ -34,15 +34,28 @@
 <body>
     <div id="app">
         <h2>图片</h2>
-        <el-upload class="upload-demo" drag action="/upload" name="file">
-            <i class="el-icon-upload" show-file-list="false"></i>
-            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-            <!-- <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div> -->
-        </el-upload>
-        <el-badge v-for="item,index in staticis_tags" :value="staticis_cnt[index]" type="primary"
-            style="margin-left: 30px;float:left;margin-top: 30px;margin-bottom: 30px">
-            <el-button size="large">[[ item ]]</el-button>
-        </el-badge>
+        <el-row>
+            <el-col :span="24">
+                <el-button type="success" @click="showTag=!showTag">Show Tag Count</el-button>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="12">
+                <el-upload class="upload-demo" drag action="/upload" name="file">
+                    <i class="el-icon-upload" show-file-list="false"></i>
+                    <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                </el-upload>
+                <div class="grid-content bg-purple"></div>
+            </el-col>
+        </el-row>
+
+        <div v-show="showTag">
+            <el-badge v-for="item,index in staticis_tags" :value="staticis_cnt[index]" type="primary"
+                style="margin-left: 30px;float:left;margin-top: 30px;margin-bottom: 30px">
+                <el-button size="large">[[ item ]]</el-button>
+            </el-badge>
+        </div>
+
         <el-input v-model="query" placeholder="please input keyword"></el-input>
 
         <ul style="overflow:auto">
@@ -57,7 +70,6 @@
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"
     integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <script type="text/javascript">
@@ -66,6 +78,7 @@
         el: '#app',
         delimiters: ['[[ ', ' ]]'],
         data: {
+            showTag: false,
             message: 'Hello Vue!',
             query: "",
             docs: [],

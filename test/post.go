@@ -25,43 +25,16 @@ func postFile(filePath string) error {
 
 	//关键的一步操作
 	fileWriter, err := bodyWriter.CreateFormFile("file", filePath)
-	// if err != nil {
-	// 	fmt.Println("error writing to buffer")
-	// 	return err
-	// }
+	if err != nil {
+		fmt.Println("error writing to buffer")
+		return err
+	}
 
 	// iocopy
 	_, err = io.Copy(fileWriter, file)
 	if err != nil {
 		return err
 	}
-
-	////设置其他参数
-	//params := map[string]string{
-	//	"user": "test",
-	//	"password": "123456",
-	//}
-	//
-	////这种设置值得仿佛 和下面再从新创建一个的一样
-	//for key, val := range params {
-	//	_ = bodyWriter.WriteField(key, val)
-	//}
-
-	//和上面那种效果一样
-	//建立第二个fields
-	// if fileWriter, err = bodyWriter.CreateFormField("user"); err != nil {
-	// 	fmt.Println(err, "----------4--------------")
-	// }
-	// if _, err = fileWriter.Write([]byte("test")); err != nil {
-	// 	fmt.Println(err, "----------5--------------")
-	// }
-	// //建立第三个fieds
-	// if fileWriter, err = bodyWriter.CreateFormField("password"); err != nil {
-	// 	fmt.Println(err, "----------4--------------")
-	// }
-	// if _, err = fileWriter.Write([]byte("123456")); err != nil {
-	// 	fmt.Println(err, "----------5--------------")
-	// }
 
 	contentType := bodyWriter.FormDataContentType()
 	bodyWriter.Close()
