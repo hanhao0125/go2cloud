@@ -3,15 +3,41 @@ package main
 import (
 	"bytes"
 	"fmt"
+	cn "go2cloud/common"
 	"io"
 	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strings"
+
+	mapset "github.com/deckarep/golang-set"
 )
 
-func postFile(filePath string) error {
+var (
+	s1     = mapset.NewSet()
+	s2     = mapset.NewSet()
+	c1 int = 0
+	c2 int = 0
+)
 
+// init the mysql table filenode. can be updated
+func Write2DB(path string, parentId int) {
+	p := cn.MountedPath + path
+	files, _ := ioutil.ReadDir(p)
+	for _, file := range files {
+		if file.IsDir() {
+			pid := cn.InsertFileNode(file, path, parentId, "dir")
+			Write2DB(path+file.Name()+"/", pid)
+		} else {
+			cn.InsertFileNode(file, path, parentId, "file")
+			log.Print(file.Name())
+		}
+	}
+}
+
+func postFile(filePath string) error {
 	//打开文件句柄操作
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -71,8 +97,39 @@ func listAll(path string) {
 	fmt.Print(cnt)
 
 }
+func deletePrefix(path, root string) string {
+	return strings.Replace(path, root, "", -1)
+}
+func CountFileNum(path string, w string, root string) {
+	files, _ := ioutil.ReadDir(path)
+	for _, fi := range files {
+		c1++
+		p := deletePrefix(path+"/"+fi.Name(), root)
+		if fi.IsDir() {
+			if w == "1" {
+				s1.Add(p)
+			} else {
+				s2.Add(p)
+			}
+			CountFileNum(path+"/"+fi.Name(), w, root)
+		} else {
+			if w == "1" {
+				s1.Add(p)
 
-// sample usage
+			} else {
+				s2.Add(p)
+			}
+		}
+	}
+}
+func fuck() {
+	p1 := "/Users/hanhao/client"
+	CountFileNum(p1, "2", p1)
+	// CountFileNum(p2, "2", p2)
+	// fmt.Println(s1.Difference(s2))
+	fmt.Println(c1)
+}
 func main() {
-	listAll("/Users/hanhao/Downloads/ILSVRC2012_img_test/")
+	fuck()
+	// listAll("/Users/hanhao/Downloads/ILSVRC2012_img_test/")
 }

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>Full Text Search</title>
+    <style>
+        #menu-item {
+            font-size: 18px;
+            font-weight: bolder
+        }
+
+        body {
+            background-color: rgb(238, 238, 238);
+            margin: 0 0 0 0;
+        }
+
+        #link {
+            font-size: 16px;
+            color: blue
+        }
+
+        p {
+            line-height: 150%;
+        }
+
+        #query {
+            width: 400px;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            padding: 0px;
+            width: 800px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+
+<body>
+    {{template "header"}}
+    <div id="search">
+        <el-row>
+            <el-col :span="24" style="text-align: center">
+                <h2>全文搜索</h2>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="12" :offset="6" style="margin-bottom: 20px">
+                <el-input v-model="query" placeholder="please input keyword"></el-input>
+            </el-col>
+        </el-row>
+        <div>
+            <el-table :data="tableData" style="width: 90%;margin-left: 100px;margin-right: 100px;">
+                <el-table-column label="" width="50">
+                    <div slot-scope="scope">
+                        <el-image style="width: 20px; height: 20px" :src="'/static'+scope.row.finalPath"
+                            v-if="scope.row.fileType == 'image'" :preview-src-list="generateArray(scope.row.finalPath)">
+                        </el-image>
+                        <el-image style="width: 20px; height: 20px" src="/logo/file.png"
+                            v-if="scope.row.fileType =='dir'">
+                        </el-image>
+
+                        <el-image style="width: 20px; height: 20px" src="/logo/pdf.png"
+                            v-if="scope.row.fileType=='pdf'">
+                        </el-image>
+                        <el-image style="width: 20px; height: 20px" src="/logo/code.png"
+                            v-if="scope.row.fileType=='code'">
+                        </el-image>
+                        <el-image style="width: 20px; height: 20px" src="/logo/code.png"
+                            v-if="scope.row.fileType=='text'">
+                        </el-image>
+                    </div>
+                </el-table-column>
+                <el-table-column label="Path" width="550" sortable>
+                    <div slot-scope="scope">
+                        <el-link icon="el-icon-folder-opened" @click="getPaths(scope.row.id)" id="dir"
+                            v-if="scope.row.fileType =='dir'">
+                            [[ scope.row.path ]]
+                        </el-link>
+                        <el-link icon="el-icon-document" id="file" :href="'/edit?pid='+scope.row.id"
+                            v-if="scope.row.fileType != 'dir'">
+                            [[ scope.row.path ]]
+                        </el-link>
+                    </div>
+                </el-table-column>
+
+                <el-table-column prop="fileSize" label="Size" width="200" sortable>
+                    <div slot-scope="scope" id="info">
+                        [[ formatterSize(scope.row.fileSize) ]]
+                    </div>
+                </el-table-column>
+                <el-table-column prop="share" label="Share" width="100" sortable>
+                    <div slot-scope="scope" id="info">
+                        [[ formatterShare(scope.row.share) ]]
+                    </div>
+                </el-table-column>
+                <el-table-column prop="modTime" label="Last Modify Time" width="300" sortable>
+                    <div slot-scope="scope" id="info">
+                        [[ scope.row.modTime ]]
+                    </div>
+                </el-table-column>
+            </el-table>
+
+        </div>
+
+    </div>
+</body>
+{{template "js"}}
+<script type="text/javascript">
+    var app = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#app',
+        data: {
+            activeIndex: 'search'
+        },
+        methods: {
+
+            handleSelect: function (key, keyPath) {
+                if (key === '#' || key === '/') {
+                    this.activeIndex = '/';
+                    window.location.href = '/'
+                }
+            }
+        },
+        created: function () {
+        }
+    })
+    // axios.defaults.baseURL = 'http://localhost:9000/'//配置接口入口地址
+    new Vue({
+        el: '#search',
+        delimiters: ['[[', ']]'],
+        data: {
+            message: 'Hello Vue!',
+            query: "",
+            docs: [],
+            tableData: []
+
+        },
+        methods: {
+            generateArray: function (p) {
+                return ["/static" + p]
+            },
+            formatterShare: function (share) {
+                if (share == 0) {
+                    return "专用"
+                } else return "公开"
+            },
+            formatterSize: function (size) {
+                if (size == 0) {
+                    return "-"
+                }
+                if (size > 1024) {
+                    return (size / 1024).toFixed(2) + " KB"
+                }
+            },
+            getPaths: function () {
+                _t = this
+                axios
+                    .get('/search?query=' + this.query)
+                    .then(function (response) {
+                        _t.tableData = []
+                        d = response.data.searchResults
+                        for (i = 0; i < d.length; i++) {
+                            _t.tableData.push({
+                                "id": d[i].Id,
+                                "type": d[i].Type,
+                                "path": d[i].Path,
+                                "parentDir": d[i].ParentDir,
+                                "parentId": d[i].ParentId,
+                                "fileSize": d[i].FileSize,
+                                "share": d[i].Share,
+                                "modTime": d[i].ModTime,
+                                "fileType": d[i].FileType,
+                                "finalPath": d[i].ParentDir + d[i].Path
+                            })
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
+        },
+        watch: {
+            query: function (o, n) {
+                _t = this
+                axios
+                    .get('http://localhost:9000/search?query=' + this.query)
+                    .then(function (response) {
+                        _t.tableData = []
+                        d = response.data.searchResults
+                        for (i = 0; i < d.length; i++) {
+                            _t.tableData.push({
+                                "id": d[i].Id,
+                                "type": d[i].Type,
+                                "path": d[i].Path,
+                                "parentDir": d[i].ParentDir,
+                                "parentId": d[i].ParentId,
+                                "fileSize": d[i].FileSize,
+                                "share": d[i].Share,
+                                "modTime": d[i].ModTime,
+                                "fileType": d[i].FileType,
+                                "finalPath": d[i].ParentDir + d[i].Path
+                            })
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
+            // query: function (newQuestion, oldQuestion) {
+
+            //     // var query = $('input#query').val();
+            //     var query = this.query;
+            //     if (query.length == 0) {
+            //         this.docs = [];
+            //         return
+            //     }
+            //     _t = this;
+            //     $.ajax({
+            //         url: "http://localhost:9000/search",
+            //         type: "GET",
+            //         data: {
+            //             query: query
+            //         },
+            //         dataType: "json",
+            //         success: function (result) {
+            //             if (result.searchResults == null) {
+            //                 return
+            //             }
+            //             _t.docs = result.searchResults
+            //         },
+            //         error: function (xhr, ajaxOptions, thrownError) {
+            //             alert(xhr.status);
+            //             alert(thrownError);
+            //         }
+            //     });
+            // }
+        }
+    })
+    function timeConverter(UNIX_timestamp) {
+        var d = new Date(UNIX_timestamp * 1000);
+
+        var year = d.getFullYear();
+        var month = d.getMonth() + 1;
+        var date = d.getDate();
+        var hour = d.getHours();
+        var min = d.getMinutes();
+        var sec = d.getSeconds();
+        var time = year + '/' + month + '/' + date + ' ' + hour + ':' + min + ':' + sec;
+
+        return time;
+    }
+
+    search = function () {
+        var query = $('input#query').val();
+        if (query.length == 0) {
+            return
+        }
+        $.ajax({
+            url: "http://localhost:9000/search",
+            type: "GET",
+            data: {
+                query: query
+            },
+            dataType: "json",
+            success: function (result) {
+                if (result.docs == null) {
+                    return
+                }
+                var out = "<table border=0>"
+                var weibos = new Array();
+
+
+                for (var i = 0; i < result.docs.length; i++) {
+                    weibos.push(result.docs[i]);
+                }
+
+                for (var i = 0; i < weibos.length; i++) {
+                    out += "<tr>"
+                    out += "<td width=150px>";
+                    out += weibos[i].Path;
+                    out += "<br>"
+                    out += "time";
+                    out += "<br>"
+                    out += "</td>";
+                    out += "<td>";
+                    out += "<p>" + weibos[i].Content + "</p>";
+                    out += "</td>";
+                    out += "</tr>";
+                }
+                out += "</table>"
+                $('div#output').html(out);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+    };
+</script>
+
+</html>

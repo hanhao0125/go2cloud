@@ -1,0 +1,66 @@
+{{ define "header" }}
+   <div id="app">
+        <div id="content" style="margin-bottom: 10px">
+            <el-menu :default-active="activeIndex" mode="horizontal" @select="handleSelect" background-color="#155B88"
+                text-color="#fff" active-text-color="#FF7E00" style="margin: 0 0 0 0">
+                <el-row type="flex" justify="center">
+                    <el-menu-item index="/" id="menu-item">Browser</el-menu-item>
+                    <el-menu-item index="#" style="float: right" id="menu-item">Upload Center</el-menu-item>
+                    <el-menu-item index="search" style="float: right" id="menu-item">Search</el-menu-item>
+                    <el-menu-item index="#" class="user-info">Welcome，</el-menu-item>
+                    <el-menu-item index="#" style="float: right" id="menu-item">Login</el-menu-item>
+                    </el-menu-item>
+                </el-row>
+            </el-menu>
+        </div>
+    </div> 
+{{end}}
+
+{{define "js"}}
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+{{end}}
+
+{{define "style"}}
+<style type="text/css">
+        #menu-item {
+            font-size: 18px;
+            font-weight: bolder
+        }
+
+        body {
+            background-color: rgb(238, 238, 238);
+            margin: 0 0 0 0;
+        }
+
+        #link {
+            font-size: 16px;
+            color: blue
+        }
+
+        #file {
+            font-size: 16px;
+            color: black
+        }
+
+        #info {
+            font-size: 14px;
+            color: gray
+        }
+
+        #dir {
+            font-size: 16px;
+            color: blue
+        }
+
+        .user-info {
+            font-size: 2px;
+            float: right;
+            font-weight: lighter;
+        }
+    </style>
+{{end}}

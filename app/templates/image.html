@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>图片服务器</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        body {
+            font-family: "Hiragino Sans GB", sans-serif;
+            font-size: 0.9em;
+            margin-left: 100px;
+        }
+
+        p {
+            line-height: 150%;
+        }
+
+        #query {
+            width: 400px;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            padding: 0px;
+            width: 800px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h2>图片</h2>
+        <el-row>
+            <el-col :span="24">
+                <el-button type="success" @click="showTag=!showTag">Show Tag Count</el-button>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="12">
+                <el-upload class="upload-demo" drag action="/upload" name="file">
+                    <i class="el-icon-upload" show-file-list="false"></i>
+                    <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                </el-upload>
+                <div class="grid-content bg-purple"></div>
+            </el-col>
+        </el-row>
+
+        <div v-show="showTag">
+            <el-badge v-for="item,index in staticis_tags" :value="staticis_cnt[index]" type="primary"
+                style="margin-left: 30px;float:left;margin-top: 30px;margin-bottom: 30px">
+                <el-button size="large">[[ item ]]</el-button>
+            </el-badge>
+        </div>
+
+        <el-input v-model="query" placeholder="please input keyword"></el-input>
+
+        <ul style="overflow:auto">
+            <li v-for="item,index in paths">
+                <p style="color:rebeccapurple;font-size: 20px;">[[ tags[index] ]]</p>
+                <el-image :src="item" :key="item" lazy />
+            </li>
+        </ul>
+        <!-- <el-image v-for="url in paths" :key="url" :src="url" lazy :scroll-container="scroll"></el-image> -->
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+
+    new Vue({
+        el: '#app',
+        delimiters: ['[[ ', ' ]]'],
+        data: {
+            showTag: false,
+            message: 'Hello Vue!',
+            query: "",
+            docs: [],
+            paths: [],
+            tags: [],
+            keyword: "",
+            staticis_tags: [],
+            staticis_cnt: [],
+            uploadName: "",
+            uploadData: {}
+
+        },
+        mounted: function () {
+            this.s()
+            this.st()
+        },
+        methods: {
+            st: function () {
+                _t = this
+                axios
+                    .get('http://127.0.0.1:8888/staticis')
+                    .then(function (response) {
+                        _t.staticis_tags = response.data.tags
+                        _t.staticis_cnt = response.data.cnt
+                    })
+                    .catch(function (error) { // 请求失败处理
+                        console.log(error);
+                    });
+
+            },
+            s: function () {
+                _t = this
+                axios
+                    .get('http://127.0.0.1:8888/i')
+                    .then(function (response) {
+                        _t.paths = response.data.paths
+                        _t.tags = response.data.tags
+                    })
+                    .catch(function (error) { // 请求失败处理
+                        console.log(error);
+                    });
+            },
+            notifyNoData: function () {
+                const h = this.$createElement;
+                this.$notify({
+                    title: '没有数据',
+                    message: h('i', { style: 'color: teal' }, '没有搜索到相关数据，请尝试其他关键词')
+                });
+            },
+        },
+        watch: {
+            query: function (newKey, old) {
+                _t = this
+                axios.get("/is?query=" + _t.query)
+                    .then(function (res) {
+                        if (!res.data.paths) {
+                            _t.paths = []
+                            _t.tags = []
+                            _t.notifyNoData()
+                            return
+                        }
+                        _t.paths = res.data.paths.slice(0, 20)
+                        _t.tags = res.data.tags.slice(0, 20)
+                    }).catch(function (error) {
+                        console.log(error)
+                    })
+            },
+
+        }
+    })
+</script>
+
+</html>
