@@ -44,10 +44,12 @@ func FetchReadableFileNode() []ReadableFileNode {
 }
 func FetchReadableFileNodeById(id int) ReadableFileNode {
 	n := FetchFileNodeById(id)
-	readPath := MountedPath + n.ParentDir + n.Path
-	log.Println(readPath)
+	if n.Readable == false {
+		log.Println("error, node cannot read!. ", n.FullPath)
+	}
+	readPath := MountedPath + n.FullPath
 	content := ReadFiles(readPath)
-	readableNode := ReadableFileNode{Id: n.Id, Path: n.ParentDir + n.Path, Content: content, FileType: n.FileType}
+	readableNode := ReadableFileNode{Id: n.Id, Path: n.FullPath, Content: content, FileType: n.FileType}
 	return readableNode
 }
 func GetPaths(c *gin.Context) {
@@ -111,7 +113,6 @@ func UpdateImageDB() {
 	}
 	// defer db.Close()
 	db.Find(&nodes)
-
 }
 
 func FindNodeIdByImageName(imgName string) (Node, error) {
@@ -231,4 +232,22 @@ func DeleteNodeByParentId(parentId int) {
 func UpdateNode(oldNode Node, modTime time.Time, size int64) {
 	db.Model(&oldNode).UpdateColumns(Node{ModTime: modTime, FileSize: size})
 
+}
+
+// TODO limit the result
+func FetchImageByTag(tag string) []Node {
+	nodes := []Node{}
+	db.Limit(100).Where("tag like ?", "%"+tag+"%").Find(&nodes)
+	return nodes
+}
+func FetchNodeByName(name string) []Node {
+	nodes := []Node{}
+	db.Limit(100).Where("full_path like ?", "%"+name+"%").Find(&nodes)
+	return nodes
+}
+
+func FetchImageByTagAndName(tag, name string) []Node {
+	n1 := FetchImageByTag(tag)
+	n2 := FetchNodeByName(name)
+	return append(n1, n2...)
 }

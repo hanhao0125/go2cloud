@@ -15,15 +15,14 @@
         <h1>[[ tableLen ]]</h1>
         <h3>[[ parentPaths[parentPaths.length - 1] ]]</h3>
         <el-button type="primary" @click="up">Up</el-button>
-        <el-table :data="tableData" style="width: 90%;margin-left: 100px;margin-right: 100px;">
+        <el-table :data="tableData" style="width: 90%;margin-left: 100px;margin-right: 100px;margin-bottom: 50px">
             <el-table-column label="" width="50">
                 <div slot-scope="scope">
                     <el-image style="width: 20px; height: 20px" :src="'/static'+scope.row.finalPath"
-                        v-if="scope.row.fileType == 'image'" :preview-src-list="generateArray(scope.row.finalPath)">
+                        v-if="scope.row.image" :preview-src-list="generateArray(scope.row.finalPath)">
                     </el-image>
                     <el-image style="width: 20px; height: 20px" src="/logo/file.png" v-if="scope.row.fileType =='dir'">
                     </el-image>
-
                     <el-image style="width: 20px; height: 20px" src="/logo/pdf.png" v-if="scope.row.fileType=='pdf'">
                     </el-image>
                     <el-image style="width: 20px; height: 20px" src="/logo/code.png" v-if="scope.row.fileType=='code'">
@@ -34,12 +33,16 @@
             </el-table-column>
             <el-table-column label="Path" width="550" sortable>
                 <div slot-scope="scope">
+                    <el-link icon="el-icon-picture-outline" :href="'/static'+scope.row.finalPath"
+                        v-if="scope.row.image">
+                        [[ scope.row.path ]]
+                    </el-link>
                     <el-link icon="el-icon-folder-opened" @click="clickDir(scope.row)" id="dir"
                         v-if="scope.row.fileType =='dir'">
                         [[ scope.row.path ]]
                     </el-link>
                     <el-link icon="el-icon-document" id="file" :href="'/edit?pid='+scope.row.id"
-                        v-if="scope.row.fileType != 'dir'">
+                        v-if="scope.row.fileType != 'dir' && !scope.row.image">
                         [[ scope.row.path ]]
                     </el-link>
                 </div>
@@ -150,7 +153,8 @@
                                 "share": d[i].Share,
                                 "modTime": d[i].ModTime,
                                 "fileType": d[i].FileType,
-                                "finalPath": d[i].ParentDir + d[i].Path
+                                "finalPath": d[i].ParentDir + d[i].Path,
+                                "image": d[i].Image
                             })
                         }
                     })

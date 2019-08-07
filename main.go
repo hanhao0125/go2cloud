@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
-
-var m = cn.M{}
 
 func init() {
 	log.SetPrefix("[ server ] ")
@@ -23,12 +23,11 @@ func init() {
 }
 
 func StartHttpServices() {
-	go cn.TimeScan(&m)
+
 	gin.ForceConsoleColor()
 	router := gin.Default()
 
 	router.LoadHTMLGlob("./app/templates/*")
-	// router.Static("/static", config.MountedPath)
 	router.Static("/static", cn.MountedPath)
 	router.Static("/logo", "./app/static")
 
@@ -77,7 +76,7 @@ func StartHttpServices() {
 	router.GET("/edit", func(c *gin.Context) {
 		pid := c.Query("pid")
 		pidint, _ := strconv.Atoi(pid)
-		n := m.FetchFileNodeById(pidint)
+		n := cn.FetchFileNodeById(pidint)
 		finalPath := n.ParentDir + n.Path
 		if n.FileType == "pdf" {
 			log.Println("pdf coming")
@@ -91,14 +90,26 @@ func StartHttpServices() {
 	router.GET("/upload", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "upload.html", gin.H{"title": "this a test from fserver"})
 	})
+
+	router.POST("/upload", func(c *gin.Context) {
+		file, _ := c.FormFile("file")
+		timestamp := strconv.FormatInt(time.Now().UnixNano(), 10)
+		ss := strings.Split(file.Filename, "/")
+		fileName := timestamp + ss[len(ss)-1]
+		savePath := cn.MountedPath + fileName
+		err := c.SaveUploadedFile(file, savePath)
+		if err != nil {
+			log.Println(err)
+		}
+
+	})
 	router.Run(":9205")
 }
 func FetchFilePaths(c *gin.Context) {
 	p := c.DefaultQuery("p", "-1")
 	pint, _ := strconv.Atoi(p)
 	// nodes, _ := cn.FetchNodesByParentId(pint)
-	nodes := m.FetchNodesByParentId(pint)
-	fmt.Println(len(m.Id2Node), len(m.Path2Id))
+	nodes, _ := cn.FetchNodesByParentId(pint)
 	c.JSON(http.StatusOK, gin.H{"f": nodes})
 }
 
@@ -107,6 +118,7 @@ func main() {
 	// cn.Insert(fileInfo, "/Users/hanhao/server/abc/vuex/README.md")
 	// cn.Test()
 	// StartHttpServices()
-	cn.DBScanRootPath("/")
 
+	cn.TimelyTask()
+	// cn.DBScanRootPath("/")
 }

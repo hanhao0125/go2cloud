@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"time"
 
 	mapset "github.com/deckarep/golang-set"
 )
 
 var (
 	r = mapset.NewSet()
+	I = mapset.NewSet()
 )
 
 func init() {
@@ -32,6 +34,13 @@ func init() {
 
 	r.Add("json")
 	r.Add("xml")
+
+	// image suffix
+	I.Add("png")
+	I.Add("jpg")
+	I.Add("jpeg")
+	I.Add("svg")
+
 }
 
 func ReadFiles(path string) string {
@@ -45,19 +54,37 @@ func ReadFiles(path string) string {
 }
 
 // TODO now only judge the filetype by filename suffix
-// return (canRead,fileType). only file (not dir) should be fileName
-func GetFileType(fileName string) (bool, string) {
+// return (canRead,isImage,fileType). only file (not dir) should be fileName
+func GetFileType(fileName string) (bool, bool, string) {
+	readable, image := false, false
 	ss := strings.Split(fileName, ".")
+	// no specifal suffix, return file
+	if len(ss) == 1 {
+		return readable, image, "file"
+
+	}
 	suffix := ss[len(ss)-1]
-	if len(suffix) == 0 {
-		return false, "file"
-	}
+	suffix = strings.ToLower(suffix)
+
 	if r.Contains(suffix) {
-		return true, suffix
+		readable = true
 	}
-	return false, "file"
+	if I.Contains(suffix) {
+		image = true
+	}
+
+	return readable, image, suffix
+}
+
+func IsImage(fileName string) bool {
+	_, image, _ := GetFileType(fileName)
+	return image
 }
 func GenerateGID() int {
 	GID++
 	return GID
+}
+func RunTime(start time.Time) {
+	elapsed := time.Since(start)
+	fmt.Println("run time:", elapsed)
 }

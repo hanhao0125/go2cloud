@@ -13,6 +13,9 @@ type Node struct {
 	FileType  string
 	Indexed   int
 	FullPath  string
+	Image     bool
+	Readable  bool
+	Tag       string
 }
 
 func (Node) TableName() string {

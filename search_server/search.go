@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	cn "go2cloud/common"
 	"log"
 	"strconv"
@@ -41,11 +40,13 @@ func Search(query string) []cn.Node {
 	resp := searcher.SearchDoc(req)
 	log.Println("start query")
 	searchRet := []cn.Node{}
+
 	for _, c := range resp.Docs {
-		fmt.Println(c.DocId)
 		id, _ := strconv.Atoi(c.DocId)
 		searchRet = append(searchRet, cn.FetchFileNodeById(id))
 	}
+	searchByName := searchImage(query)
+	searchRet = append(searchRet, searchByName...)
 	log.Printf("find realted `%s` files:%d", query, len(searchRet))
 	return searchRet
 }
@@ -89,11 +90,17 @@ func (c *Consumer) HandleMessage(message *nsq.Message) error {
 		return err
 	}
 	node := cn.FetchReadableFileNodeById(id)
+	// force flush index
 	searcher.Index(strconv.Itoa(node.Id), types.DocData{Content: node.Content}, true)
-	// c.engine.Flush()
 
 	log.Println("success process message:", mes, "success indexed the search engine")
 	return nil
+}
+
+// search image by filename and tag
+func searchImage(query string) []cn.Node {
+	nodes := cn.FetchImageByTagAndName(query, query)
+	return nodes
 }
 
 func RecieveAndProcess() {

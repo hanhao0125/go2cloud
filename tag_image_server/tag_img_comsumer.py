@@ -7,7 +7,7 @@ from functools import wraps
 import nsq
 import torch
 import torchvision.models as models
-from PIL import Image
+from PIL import Image as IM
 from sqlalchemy import DATETIME, Column, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -20,7 +20,7 @@ session = DBSession()
 with open("imagenet_class_index.json", "r") as f:
     class_idx = json.load(f)
 idx2label = [class_idx[str(k)][1].lower() for k in range(len(class_idx))]
-
+mounted_path = "/Users/hanhao/server"
 
 resnet = models.resnet101(pretrained=True)
 transform = transforms.Compose([  # [1]
@@ -34,7 +34,7 @@ transform = transforms.Compose([  # [1]
 
 
 def predict(path="dog.png"):
-    img = Image.open(path)
+    img = IM.open(path)
     if img.mode == "L":
         print("error shape:", img.mode)
         return
@@ -54,14 +54,11 @@ def predict(path="dog.png"):
     }
 
 
-class Image(Base):
-    __tablename__ = 'image'
+class Node(Base):
+    __tablename__ = 'filenode'
     id = Column(Integer, primary_key=True)
-    tag = Column(String(500))
-    top5 = Column(String(500))
-    path = Column(String(200))
-    upath = Column(String(200))
-    uploaddate = Column(DATETIME)
+    tag = Column(String(100))
+    full_path = Column(String(500))
 
     def __str__(self):
         return f"{self.id}\t {self.path}"
@@ -69,15 +66,20 @@ class Image(Base):
 
 def handler(message):
     message = message.body.decode()
-    iid, message = message.split("|")
+    iid = message
 
-    r = predict(message)
+    n = session.query(Node).get(int(iid))
+    if n == None:
+        print("err,no such node,", iid)
+        return True
+    r = predict(mounted_path + n.full_path)
     if r == None:
         return True
-    I = session.query(Image).get(int(iid))
-    I.tag = r['tag'].split('|')[0]
-    I.top5 = r['tag']
+
+    n.tag = r['tag'].split('|')[0]
+    session.add(n)
     session.commit()
+    session.close()
     return True
 
 
