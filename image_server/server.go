@@ -20,7 +20,6 @@ var (
 )
 
 func ImageServer() {
-
 	gin.ForceConsoleColor()
 	router := gin.Default()
 

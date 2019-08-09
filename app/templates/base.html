@@ -12,10 +12,26 @@
 <body>
     {{template "header"}}
     <div id="main">
-        <h1>[[ tableLen ]]</h1>
-        <h3>[[ parentPaths[parentPaths.length - 1] ]]</h3>
-        <el-button type="primary" @click="up">Up</el-button>
-        <el-table :data="tableData" style="width: 90%;margin-left: 100px;margin-right: 100px;margin-bottom: 50px">
+        <div style="margin-left: 60px">
+            <el-row>
+                <el-col :span="3">
+                    <h3>Totally Files : [[ tableLen ]]</h3>
+                </el-col>
+
+            </el-row>
+            <el-row>
+                <el-col :span="3">
+                    <p style="font-size: 15px">[[ currentDir ]]</p>
+                </el-col>
+                <el-col :span="3">
+                    <el-button type="" @click="up">Upper</el-button>
+                </el-col>
+            </el-row>
+
+
+
+        </div>
+        <el-table :data="tableData" style="width: 100%;margin-left: 50px;margin-right: 50px;margin-bottom: 50px">
             <el-table-column label="" width="50">
                 <div slot-scope="scope">
                     <el-image style="width: 20px; height: 20px" :src="'/static'+scope.row.finalPath"
@@ -31,7 +47,7 @@
                     </el-image>
                 </div>
             </el-table-column>
-            <el-table-column label="Path" width="550" sortable>
+            <el-table-column label="Path" width="500" sortable>
                 <div slot-scope="scope">
                     <el-link icon="el-icon-picture-outline" :href="'/static'+scope.row.finalPath"
                         v-if="scope.row.image">
@@ -48,7 +64,7 @@
                 </div>
             </el-table-column>
 
-            <el-table-column prop="fileSize" label="Size" width="200" sortable>
+            <el-table-column prop="fileSize" label="Size" width="100" sortable>
                 <div slot-scope="scope" id="info">
                     [[ formatterSize(scope.row.fileSize) ]]
                 </div>
@@ -61,6 +77,11 @@
             <el-table-column prop="modTime" label="Last Modify Time" width="300" sortable>
                 <div slot-scope="scope" id="info">
                     [[ scope.row.modTime ]]
+                </div>
+            </el-table-column>
+            <el-table-column prop="tag" label="Tag" width="200" sortable>
+                <div slot-scope="scope" id="info">
+                    [[ scope.row.tag ]]
                 </div>
             </el-table-column>
         </el-table>
@@ -102,6 +123,7 @@
             tableLen: 0,
             pid: [],
             parentPaths: [],
+            currentDir: "/"
         },
         methods: {
             up: function () {
@@ -143,6 +165,7 @@
                         d = response.data.f
                         _t.tableLen = d.length
                         for (i = 0; i < d.length; i++) {
+                            _t.currentDir = d[i].ParentDir
                             _t.tableData.push({
                                 "id": d[i].Id,
                                 "type": d[i].Type,
@@ -154,7 +177,8 @@
                                 "modTime": d[i].ModTime,
                                 "fileType": d[i].FileType,
                                 "finalPath": d[i].ParentDir + d[i].Path,
-                                "image": d[i].Image
+                                "image": d[i].Image,
+                                "tag": d[i].Tag,
                             })
                         }
                     })

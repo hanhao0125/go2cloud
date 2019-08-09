@@ -91,7 +91,7 @@ func StartHttpServices() {
 		c.HTML(http.StatusOK, "upload.html", gin.H{"title": "this a test from fserver"})
 	})
 
-	router.POST("/upload", func(c *gin.Context) {
+	router.POST("/upload1", func(c *gin.Context) {
 		file, _ := c.FormFile("file")
 		timestamp := strconv.FormatInt(time.Now().UnixNano(), 10)
 		ss := strings.Split(file.Filename, "/")
@@ -101,9 +101,8 @@ func StartHttpServices() {
 		if err != nil {
 			log.Println(err)
 		}
-
 	})
-	router.Run(":9205")
+	router.Run(cn.WebServicePort)
 }
 func FetchFilePaths(c *gin.Context) {
 	p := c.DefaultQuery("p", "-1")
@@ -117,8 +116,8 @@ func main() {
 	// fileInfo, _ := os.Stat(cn.MountedPath + "/" + "abc/vuex/README.md")
 	// cn.Insert(fileInfo, "/Users/hanhao/server/abc/vuex/README.md")
 	// cn.Test()
-	// StartHttpServices()
+	StartHttpServices()
 
-	cn.TimelyTask()
+	// cn.TimelyTask()
 	// cn.DBScanRootPath("/")
 }

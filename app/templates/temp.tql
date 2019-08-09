@@ -5,7 +5,6 @@
                 text-color="#fff" active-text-color="#FF7E00" style="margin: 0 0 0 0">
                 <el-row type="flex" justify="center">
                     <el-menu-item index="/" id="menu-item">Browser</el-menu-item>
-                    <el-menu-item index="#" style="float: right" id="menu-item">Upload Center</el-menu-item>
                     <el-menu-item index="search" style="float: right" id="menu-item">Search</el-menu-item>
                     <el-menu-item index="#" class="user-info">Welcome，</el-menu-item>
                     <el-menu-item index="#" style="float: right" id="menu-item">Login</el-menu-item>

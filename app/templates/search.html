@@ -13,7 +13,6 @@
         }
 
         body {
-            background-color: rgb(238, 238, 238);
             margin: 0 0 0 0;
         }
 
@@ -45,7 +44,8 @@
     <div id="search">
         <el-row>
             <el-col :span="24" style="text-align: center">
-                <h2>全文搜索</h2>
+                <h2>Full Text Search</h2>
+                <h6>Totally Index Doc: [[ indexedDocNum ]], Indexed Token: [[indexedTokenNum]]</h6>
             </el-col>
         </el-row>
         <el-row>
@@ -54,16 +54,15 @@
             </el-col>
         </el-row>
         <div>
-            <el-table :data="tableData" style="width: 90%;margin-left: 100px;margin-right: 100px;">
+            <el-table :data="tableData" style="width: 100%;margin-left: 50px;margin-right: 50px;margin-bottom: 50px">
                 <el-table-column label="" width="50">
                     <div slot-scope="scope">
                         <el-image style="width: 20px; height: 20px" :src="'/static'+scope.row.finalPath"
-                            v-if="scope.row.fileType == 'image'" :preview-src-list="generateArray(scope.row.finalPath)">
+                            v-if="scope.row.image" :preview-src-list="generateArray(scope.row.finalPath)">
                         </el-image>
                         <el-image style="width: 20px; height: 20px" src="/logo/file.png"
                             v-if="scope.row.fileType =='dir'">
                         </el-image>
-
                         <el-image style="width: 20px; height: 20px" src="/logo/pdf.png"
                             v-if="scope.row.fileType=='pdf'">
                         </el-image>
@@ -75,20 +74,24 @@
                         </el-image>
                     </div>
                 </el-table-column>
-                <el-table-column label="Path" width="550" sortable>
+                <el-table-column label="Path" width="500" sortable>
                     <div slot-scope="scope">
-                        <el-link icon="el-icon-folder-opened" @click="getPaths(scope.row.id)" id="dir"
+                        <el-link icon="el-icon-picture-outline" :href="'/static'+scope.row.finalPath"
+                            v-if="scope.row.image">
+                            [[ scope.row.path ]]
+                        </el-link>
+                        <el-link icon="el-icon-folder-opened" @click="clickDir(scope.row)" id="dir"
                             v-if="scope.row.fileType =='dir'">
                             [[ scope.row.path ]]
                         </el-link>
                         <el-link icon="el-icon-document" id="file" :href="'/edit?pid='+scope.row.id"
-                            v-if="scope.row.fileType != 'dir'">
+                            v-if="scope.row.fileType != 'dir' && !scope.row.image">
                             [[ scope.row.path ]]
                         </el-link>
                     </div>
                 </el-table-column>
 
-                <el-table-column prop="fileSize" label="Size" width="200" sortable>
+                <el-table-column prop="fileSize" label="Size" width="100" sortable>
                     <div slot-scope="scope" id="info">
                         [[ formatterSize(scope.row.fileSize) ]]
                     </div>
@@ -101,6 +104,11 @@
                 <el-table-column prop="modTime" label="Last Modify Time" width="300" sortable>
                     <div slot-scope="scope" id="info">
                         [[ scope.row.modTime ]]
+                    </div>
+                </el-table-column>
+                <el-table-column prop="tag" label="Tag" width="200" sortable>
+                    <div slot-scope="scope" id="info">
+                        [[ scope.row.tag ]]
                     </div>
                 </el-table-column>
             </el-table>
@@ -137,10 +145,23 @@
             message: 'Hello Vue!',
             query: "",
             docs: [],
-            tableData: []
-
+            tableData: [],
+            indexedDocNum: 0,
+            indexedTokenNum: 0,
+        },
+        created: function () {
+            this.getIndexedDocsNum()
         },
         methods: {
+            getIndexedDocsNum: function () {
+                _t = this
+                axios
+                    .get('http://localhost:9000/index_info' + this.query)
+                    .then(function (response) {
+                        _t.indexedTokenNum = response.data.indexedTokenNum
+                        _t.indexedDocNum = response.data.indexedDocNum
+                    })
+            },
             generateArray: function (p) {
                 return ["/static" + p]
             },
@@ -175,7 +196,9 @@
                                 "share": d[i].Share,
                                 "modTime": d[i].ModTime,
                                 "fileType": d[i].FileType,
-                                "finalPath": d[i].ParentDir + d[i].Path
+                                "finalPath": d[i].ParentDir + d[i].Path,
+                                "fullPath": d[i].FullPath,
+                                "image": d[i].Image,
                             })
                         }
                     })
@@ -186,6 +209,10 @@
         },
         watch: {
             query: function (o, n) {
+                if (this.query.length == 0) {
+                    this.tableData = []
+                    return
+                }
                 _t = this
                 axios
                     .get('http://localhost:9000/search?query=' + this.query)
@@ -203,7 +230,9 @@
                                 "share": d[i].Share,
                                 "modTime": d[i].ModTime,
                                 "fileType": d[i].FileType,
-                                "finalPath": d[i].ParentDir + d[i].Path
+                                "finalPath": d[i].ParentDir + d[i].Path,
+                                "image": d[i].Image,
+                                "tag": d[i].Tag,
                             })
                         }
                     })

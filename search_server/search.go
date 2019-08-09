@@ -26,7 +26,7 @@ var (
 
 func IndexFromDB() {
 	readableNodes := cn.FetchReadableFileNode()
-
+	log.Println("find %d readable files", len(readableNodes))
 	defer searcher.Close()
 	for _, v := range readableNodes {
 		searcher.Index(strconv.Itoa(v.Id), types.DocData{Content: v.Content})
@@ -48,39 +48,17 @@ func Search(query string) []cn.Node {
 	searchByName := searchImage(query)
 	searchRet = append(searchRet, searchByName...)
 	log.Printf("find realted `%s` files:%d", query, len(searchRet))
+	// currently return 1000 amlost for speed
+	if len(searchRet) > 200 {
+		searchRet = searchRet[:200]
+	}
 	return searchRet
 }
 
-// update the engine index. This operation will lock the search engine.
-func UpdateIndex(node cn.ReadableFileNode) {
-	searcher.Index(strconv.Itoa(node.Id), types.DocData{Content: node.Content})
+type AddIndexConsumer struct {
 }
 
-func StartSearchHttpService() {
-	IndexFromDB()
-	go RecieveAndProcess()
-
-	gin.ForceConsoleColor()
-	router := gin.Default()
-	router.Use(cors.Default())
-	router.GET("/test", func(c *gin.Context) {
-		c.JSON(200, gin.H{"abc": "1"})
-	})
-
-	router.GET("/search", func(c *gin.Context) {
-		query := c.Query("query")
-		res := Search(query)
-		c.JSON(200, gin.H{
-			"searchResults": res,
-		})
-	})
-	router.Run(":9000")
-}
-
-type Consumer struct {
-}
-
-func (c *Consumer) HandleMessage(message *nsq.Message) error {
+func (a *AddIndexConsumer) HandleMessage(message *nsq.Message) error {
 	log.Println("NSQ message received:")
 	// process message
 	mes := string(message.Body)
@@ -103,7 +81,7 @@ func searchImage(query string) []cn.Node {
 	return nodes
 }
 
-func RecieveAndProcess() {
+func AddIndexService() {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 
@@ -114,15 +92,77 @@ func RecieveAndProcess() {
 	}
 	//c.MaxInFlight defaults to 1
 
-	c.AddHandler(&Consumer{})
+	c.AddHandler(&AddIndexConsumer{})
 
 	err = c.ConnectToNSQD(cn.NSQAddress)
 	if err != nil {
 		log.Panic("Could not connect")
 	}
-	log.Println("Awaiting messages from NSQ topic \"My NSQ Topic\"...")
+	log.Println("Awaiting messages from NSQ topic ", cn.IndexedTextTopic)
 	wg.Wait()
 }
+
+func RemoveIndexService() {
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+
+	decodeConfig := nsq.NewConfig()
+	c, err := nsq.NewConsumer(cn.RemoveIndexTextTopic, cn.RemoveIndexTextChan, decodeConfig)
+	if err != nil {
+		log.Panic("Could not create consumer")
+	}
+	//c.MaxInFlight defaults to 1
+
+	c.AddHandler(&RemoveIndexConsumer{})
+
+	err = c.ConnectToNSQD(cn.NSQAddress)
+	if err != nil {
+		log.Panic("Could not connect")
+	}
+	log.Println("Awaiting messages from NSQ topic ", cn.RemoveIndexTextTopic)
+	wg.Wait()
+}
+
+type RemoveIndexConsumer struct {
+}
+
+func (r *RemoveIndexConsumer) HandleMessage(message *nsq.Message) error {
+	log.Println("NSQ message received:")
+	// process message
+	mes := string(message.Body)
+	id := mes
+	// force flush index
+	searcher.RemoveDoc(id, true)
+
+	log.Println("success process message:", mes, "success remove index from search engine")
+	return nil
+}
+
+func StartSearchHttpService() {
+	// TODO init from stored index
+	IndexFromDB()
+
+	// nsq consumer
+	go AddIndexService()
+	go RemoveIndexService()
+
+	gin.ForceConsoleColor()
+	router := gin.Default()
+	router.Use(cors.Default())
+
+	router.GET("/search", func(c *gin.Context) {
+		query := c.Query("query")
+		res := Search(query)
+		c.JSON(200, gin.H{
+			"searchResults": res,
+		})
+	})
+	router.GET("/index_info", func(c *gin.Context) {
+		c.JSON(200, gin.H{"indexedDocNum": searcher.NumIndexed(), "indexedTokenNum": searcher.NumTokenAdded()})
+	})
+	router.Run(cn.SearchServicePort)
+}
+
 func main() {
 	StartSearchHttpService()
 }

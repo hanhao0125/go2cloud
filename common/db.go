@@ -12,7 +12,10 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	// _ "github.com/jinzhu/gorm/dialects/sqlite"
+	// _ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 var db *gorm.DB
@@ -20,8 +23,11 @@ var db *gorm.DB
 func init() {
 	var err error
 	db, err = gorm.Open("mysql", MysqlPath)
+	// db, err = gorm.Open("postgres", "host=127.0.0.1 user=hanhao dbname=test_db sslmode=disable password=root")
+	// db, err = gorm.Open("sqlite3", SQLitePath)
 
 	if err != nil {
+		log.Println("open db error")
 		panic(err)
 	}
 	db.DB().SetMaxIdleConns(10)
@@ -30,7 +36,7 @@ func init() {
 
 func FetchReadableFileNode() []ReadableFileNode {
 	nodes := []Node{}
-	db.Where("file_type = ?", "text").Find(&nodes)
+	db.Where("readable = ?", "1").Find(&nodes)
 
 	rnds := []ReadableFileNode{}
 

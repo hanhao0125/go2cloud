@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"strings"
 	"time"
 
@@ -47,7 +48,7 @@ func ReadFiles(path string) string {
 	b, e := ioutil.ReadFile(path)
 
 	if e != nil {
-		fmt.Println("read file error")
+		log.Println("read file error")
 		return "error"
 	}
 	return string(b)
