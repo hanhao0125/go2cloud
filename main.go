@@ -69,7 +69,7 @@ func StartHttpServices() {
 
 	router.GET("/ace", func(c *gin.Context) {
 		path := cn.MountedPath + c.Query("src")
-		c.HTML(http.StatusOK, "iframe.html", gin.H{"title": "this a test from fserver", "text": cn.ReadFiles(path)})
+		c.HTML(http.StatusOK, "iframe.html", gin.H{"text": cn.ReadFiles(path)})
 
 	})
 
@@ -105,7 +105,7 @@ func StartHttpServices() {
 	router.Run(cn.WebServicePort)
 }
 func FetchFilePaths(c *gin.Context) {
-	p := c.DefaultQuery("p", "-1")
+	p := c.DefaultQuery("p", "0")
 	pint, _ := strconv.Atoi(p)
 	// nodes, _ := cn.FetchNodesByParentId(pint)
 	nodes, _ := cn.FetchNodesByParentId(pint)

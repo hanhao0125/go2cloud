@@ -133,7 +133,14 @@ func FindNodeIdByImageName(imgName string) (Node, error) {
 	}
 	return node, nil
 }
-
+func ExistPath(fullPath string) bool {
+	node := Node{}
+	q := db.Where("full_path = ?", fullPath).First(&node)
+	if q.Error != nil {
+		return false
+	}
+	return true
+}
 func FetchFileNodeById(id int) Node {
 	node := Node{}
 	q := db.First(&node, id)
@@ -153,7 +160,7 @@ func FetchFileNodesByIds(ids []int) []Node {
 func InsertFileNode(file os.FileInfo, parentDir string, parentId int, fileType string) int {
 
 	node := Node{FileType: fileType, Path: file.Name(), ParentDir: parentDir, ParentId: parentId,
-		ModTime: file.ModTime(), FileSize: file.Size(), Share: ShareSingal, FullPath: parentDir + file.Name()}
+		ModTime: file.ModTime().String(), FileSize: file.Size(), Share: ShareSingal, FullPath: parentDir + file.Name()}
 	q := db.Create(&node)
 	if q.Error != nil {
 		log.Panic("error when insert file node,err= ", q.Error)
@@ -205,6 +212,19 @@ func FetchNodesByParentId(pid int) ([]Node, error) {
 	}
 	return nodes, nil
 }
+func FetchChildByParentDir(parentDir string) ([]Node, error) {
+	if parentDir == "/" || parentDir == "" {
+		nodes, err := FetchNodesByParentId(0)
+		return nodes, err
+	}
+	node, err := FetchNodeByFullPath(parentDir)
+	if err != nil {
+		fmt.Println(parentDir)
+		log.Println("err when fetch childs", err, parentDir)
+	}
+	nodes, err := FetchNodesByParentId(node.Id)
+	return nodes, err
+}
 func DeleteNodeByFilePath(filePath string) {
 	q := db.Where("full_path = ?", filePath).Delete(Node{})
 	if q.Error != nil {
@@ -236,7 +256,7 @@ func DeleteNodeByParentId(parentId int) {
 	}
 }
 func UpdateNode(oldNode Node, modTime time.Time, size int64) {
-	db.Model(&oldNode).UpdateColumns(Node{ModTime: modTime, FileSize: size})
+	db.Model(&oldNode).UpdateColumns(Node{ModTime: modTime.String(), FileSize: size})
 
 }
 

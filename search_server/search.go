@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	cn "go2cloud/common"
 	"log"
 	"strconv"
@@ -16,7 +17,8 @@ import (
 func init() {
 	log.SetPrefix("[SEARCH]")
 	log.SetFlags(log.LstdFlags | log.Lshortfile | log.LUTC)
-	searcher.Init(types.EngineOpts{})
+	// searcher.Init(types.EngineOpts{})
+	searcher.Init(types.EngineOpts{UseStore: true, StoreFolder: "/Users/hanhao/netserver/riot_index/"})
 }
 
 var (
@@ -26,11 +28,13 @@ var (
 
 func IndexFromDB() {
 	readableNodes := cn.FetchReadableFileNode()
-	log.Println("find %d readable files", len(readableNodes))
+	log.Println("find readable files:", len(readableNodes))
 	defer searcher.Close()
+	fmt.Println("readable files:", len(readableNodes))
 	for _, v := range readableNodes {
 		searcher.Index(strconv.Itoa(v.Id), types.DocData{Content: v.Content})
 	}
+	fmt.Println("indexed num:", searcher.NumDocsIndexed())
 	// 等待索引刷新完毕
 	searcher.Flush()
 }

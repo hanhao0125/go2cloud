@@ -2,7 +2,7 @@ package common
 
 const (
 	SyncServerAddress    string = "localhost:8888"
-	MysqlPath            string = "root:root@/cloud?charset=utf8mb4&parseTime=True&loc=Local"
+	MysqlPath            string = "root:root@/cloud?charset=utf8mb4&parseTime=True"
 	MountedPath          string = "/Users/hanhao"
 	ReplaceSpace         string = "^"
 	RedisAddress         string = "127.0.0.1:6379"

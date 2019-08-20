@@ -7,7 +7,7 @@ type Node struct {
 	Path      string
 	ParentDir string
 	ParentId  int
-	ModTime   time.Time
+	ModTime   string
 	FileSize  int64
 	Share     int
 	FileType  string

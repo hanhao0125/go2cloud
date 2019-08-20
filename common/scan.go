@@ -6,60 +6,41 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
+
+	sll "github.com/emirpasic/gods/lists/singlylinkedlist"
 
 	mapset "github.com/deckarep/golang-set"
 )
 
+func init() {
+	log.SetPrefix("[ scan ] ")
+	log.SetFlags(log.LstdFlags | log.Lshortfile | log.LUTC)
+}
+
 var (
-	Paths             = make([]string, 0)
-	CurrentPaths      = mapset.NewSet()
-	PreviousPaths     = mapset.NewSet()
-	cnt           int = 0
+	Paths         = make([]string, 0)
+	CurrentPaths  = mapset.NewSet()
+	PreviousPaths = mapset.NewSet()
+	InitMap       = make(map[string]string)
 )
 
-func getRelativePath(absPath string) string {
-	return strings.Replace(absPath, MountedPath, "", -1) + "/"
-}
-
-//对比出差异
-/*
-	新增加的、删除掉的、更新的
-	新增加的：直接添加即可
-	更新的：直接更新
-	删除掉的：
-*/
-
-func ExistPath(fullPath string) bool {
-	node := Node{}
-	q := db.Where("full_path = ?", fullPath).First(&node)
-	if q.Error != nil {
-		return false
-	}
-	return true
-}
-
-func GetNodeByFullPath(fullPath string) (Node, error) {
-	node := Node{}
-	q := db.Where("full_path = ?", fullPath).First(&node)
-	if q.Error != nil {
-		log.Println("find error , full_path", q.Error)
-		return node, q.Error
-	}
-	return node, nil
-}
-func Insert(fileInfo os.FileInfo, absPath string, pid int) int {
-	fullPath := strings.Replace(absPath, MountedPath, "", -1)
+func Insert(fileInfo os.FileInfo, fullPath string, parentId int) int {
+	// fullPath := strings.Replace(absPath, MountedPath, "", -1)
 
 	// exist , return
 	if ExistPath(fullPath) {
 		log.Println("error")
 		return -2
 	}
-	parentPath := strings.Replace(fullPath, fileInfo.Name(), "", -1)
-	parentId := 0
+	parentPath := ""
+	if parentId == 0 {
+		parentPath = "/"
+	} else {
+		parentNode := FetchFileNodeById(parentId)
+		parentPath = parentNode.FullPath + "/"
+	}
 
 	fileType := ""
 	readable, image := false, false
@@ -70,22 +51,10 @@ func Insert(fileInfo os.FileInfo, absPath string, pid int) int {
 		readable, image, fileType = GetFileType(fileInfo.Name())
 	}
 
-	// if parentPath == RootParentDir {
-	// 	parentId = RootParentId
-	// } else {
-	// 	// delete the `/`
-	// 	parentNode, err := GetNodeByFullPath(parentPath[:len(parentPath)-1])
-	// 	if err != nil {
-	// 		log.Println("err=", err)
-	// 		log.Println(parentPath[:len(parentPath)-1], fullPath)
-	// 	}
-	// 	parentId = parentNode.Id
-	// }
-	parentId = pid
-
 	n := Node{FileSize: fileInfo.Size(), FullPath: fullPath, Path: fileInfo.Name(), Share: ShareSingal,
-		ParentDir: parentPath, ModTime: fileInfo.ModTime(), FileType: fileType, ParentId: parentId,
+		ParentDir: parentPath, ModTime: fileInfo.ModTime().String(), FileType: fileType, ParentId: parentId,
 		Image: image, Readable: readable}
+
 	q := db.Create(&n)
 	if q.Error != nil {
 		log.Println("error when create new node, err= ", q.Error)
@@ -106,40 +75,80 @@ func Insert(fileInfo os.FileInfo, absPath string, pid int) int {
 	return n.Id
 }
 
-func T() {
-	g := &sync.WaitGroup{}
-	cnt = 0
-	g.Add(1)
-	DBScanRootPath("/", -1, g)
-	fmt.Println("process fire count: ", cnt)
-	g.Wait()
-}
-
 // to init the db
-func DBScanRootPath(path string, parentId int, g *sync.WaitGroup) {
-	defer g.Done()
+func DBScanRootPath(path string, parentId int) {
 	absPath := MountedPath + path
 	files, _ := ioutil.ReadDir(absPath)
 	for _, info := range files {
-		cnt++
-		ap := absPath + info.Name()
+		full_path := path + info.Name()
+		InitMap[full_path] = info.ModTime().String()
 		if info.IsDir() {
-			g.Add(1)
-			pid := Insert(info, ap, parentId)
-			go DBScanRootPath(path+info.Name()+"/", pid, g)
+			pid := Insert(info, full_path, parentId)
+			DBScanRootPath(full_path+"/", pid)
 		} else {
-			Insert(info, ap, parentId)
+			Insert(info, full_path, parentId)
 		}
 	}
 }
 
-// TODO use global Paths
+var wg = sync.WaitGroup{}
+
+func DBScanRootPathWithGo(path string, parentId int) {
+	absPath := MountedPath + path
+	files, _ := ioutil.ReadDir(absPath)
+	for _, info := range files {
+		full_path := path + info.Name()
+		// InitMap[full_path] = info.ModTime().String()
+		if info.IsDir() {
+			// pid := Insert(info, full_path, parentId)
+			// wg.Add(1)
+			// fmt.Println(runtime.NumGoroutine())
+			func() {
+				DBScanRootPathWithGo(full_path+"/", -1)
+				// wg.Done()
+			}()
+		} else {
+			// Insert(info, full_path, parentId)
+		}
+	}
+}
+
+func DBScanRootPathWithNonRecur(path string, parentId int) {
+	absPath := MountedPath + path
+	// P := []string{path}
+	z := 0
+	list := sll.New()
+	list.Add(path)
+	for !list.Empty() {
+		k, _ := list.Get(0)
+		path = k.(string)
+		list.Remove(0)
+		absPath = MountedPath + path
+		// fmt.Println(P[0])
+		files, _ := ioutil.ReadDir(absPath)
+		for _, info := range files {
+			z += 1
+			full_path := path + info.Name()
+			// InitMap[full_path] = info.ModTime().String()
+			if info.IsDir() {
+				list.Add(full_path + "/")
+				// pid := Insert(info, full_path, parentId)
+				// wg.Add(1)
+				// fmt.Println(runtime.NumGoroutine())
+				// func() {
+				// DBScanRootPathWithGo(full_path+"/", -1)
+				// wg.Done()
+				// }()
+			} else {
+				// Insert(info, full_path, parentId)
+			}
+		}
+	}
+}
 func GetAllFilesFromDisk(path string) {
 	absPath := MountedPath + path
 	files, _ := ioutil.ReadDir(absPath)
 	for _, info := range files {
-		// ap := absPath + info.Name()
-		CurrentPaths.Add(path + info.Name())
 		if info.IsDir() {
 			Paths = append(Paths, path+info.Name())
 			GetAllFilesFromDisk(path + info.Name() + "/")
@@ -149,103 +158,113 @@ func GetAllFilesFromDisk(path string) {
 	}
 }
 
-//when compare the difference , use this function to handle create event, works for `dir` and regular file.
-func InsertNotExistInDB(path string) {
-	path = MountedPath + path
-	info, err := os.Stat(path)
+func DetectUpdate(path string) {
+	absPath := MountedPath + path
+	files, err := ioutil.ReadDir(absPath)
 	if err != nil {
-		log.Println("err = ", err)
+		log.Println("err,", err)
 	}
-	// relativePath := strings.Replace(path, MountedPath, "", -1)
-	// first insert no matter `dir` or `file`
-	Insert(info, path, -1)
-	if info.IsDir() {
-		// dir , Scan from path
-		// DBScanRootPath(relativePath+"/", -1)
+	for _, info := range files {
+		p := path + info.Name()
+		if v, ok := InitMap[p]; ok {
+			// exist path, check if update
+			if v == info.ModTime().String() {
+				// no update
+			} else {
+
+				if info.IsDir() {
+					DetectUpdate(p + "/")
+				}
+				InitMap[p] = info.ModTime().String()
+			}
+			// doesn't exist, add to  initMap for next usage.
+		} else {
+			log.Println("add new path:", path)
+			UpdateHandler(info, path)
+			InitMap[p] = info.ModTime().String()
+		}
 	}
 }
-
-// TODO may can be done by multi go
-func Compare() {
-	defer RunTime(time.Now())
-	Paths = Paths[:0]
-	// first read all path from file system
-	GetAllFilesFromDisk("/")
-	fmt.Println(len(Paths))
-	neededAdd := CurrentPaths.Difference(PreviousPaths)
-	neededDelete := PreviousPaths.Difference(CurrentPaths)
-
-	for v := range neededAdd.Iter() {
-		if v, ok := v.(string); ok {
-			InsertNotExistInDB(v)
+func UpdateHandler(info os.FileInfo, parentDir string) {
+	if parentDir == "/" {
+		pid := 0
+		id := Insert(info, parentDir+info.Name(), pid)
+		if info.IsDir() {
+			DBScanRootPath(parentDir+info.Name(), id)
 		}
+		return
 	}
-	for v := range neededDelete.Iter() {
-		if v, ok := v.(string); ok {
-			// fetch then delete it.
-			node, err := FetchNodeByFullPath(v)
-			if err != nil {
-				log.Println("no such node,err = ", err, v)
-			}
-			if node.FileType == "dir" {
-				db.Where("parent_id = ?", node.Id).Delete(Node{})
-			}
-			db.Delete(&node)
-		}
+	p, err := FetchNodeByFullPath(parentDir[:len(parentDir)-1])
+
+	if err != nil {
+		log.Println("no such parent,err=", err)
+	}
+	id := Insert(info, parentDir+info.Name(), p.Id)
+	if info.IsDir() {
+		DBScanRootPath(parentDir+info.Name()+"/", id)
 	}
 
-	// compare with db
-	addCnt, deleteCnt := 0, 0
-	for _, p := range Paths {
-		_, err := GetNodeByFullPath(p)
-		// db doesn't contain this path , insert this path
-		// implement the high-level Insert method that can handle insert `dir` event.
-		// err != nil means db doesn't contain this path, insert to db.
-		if err != nil {
-			log.Println("new path, insert to db:", p)
-			// can handle `dir` and `file`
-			InsertNotExistInDB(p)
-			addCnt++
-		}
-		// for now, don't care update event.
+}
+func DetectDelete(path string) {
+	absPath := MountedPath + path
+	files, err := ioutil.ReadDir(absPath)
+	if err != nil {
+		log.Println("cannot read from system, err=", err)
 	}
-	if addCnt == 0 {
-		log.Println("nothing needed to be add")
-	} else {
-		log.Println("files added:", addCnt)
+	// first fetch all childs that belongs to path
+	childs, err := FetchChildByParentDir(path[:len(path)-1])
+	if err != nil {
+		log.Println("cannot read from db, err= ", err)
 	}
-	nodes := GetAllNodes()
-	pathSet := mapset.NewSet()
-	for _, p := range Paths {
-		pathSet.Add(p)
+	// add system files to set for next quickly contains computation.
+	t := mapset.NewSet()
+	for _, v := range files {
+		t.Add(v.Name())
 	}
-	for _, n := range nodes {
-		if pathSet.Contains(n.FullPath) {
-			// do nothing. maybe update
 
+	for _, v := range childs {
+		// system doesn't have the path , update db.
+		if !t.Contains(v.Path) {
+			log.Println("delete", path+v.Path)
+			deleteHandler(path + v.Path)
+			delete(InitMap, path+v.Path)
 		} else {
-			log.Println("delete event")
-			PublishToRemoveIndex(n.Id)
-			// delete the old path
-			// if dir, then delete itself and where parent_id = n.Id
-			// if not dir, then only need delete itself
-			if n.FileType == "dir" {
-				// first delete childs
-				db.Where("parent_id = ?", n.Id).Delete(Node{})
+			// only traversing the updated folders.( only changed folders can exist deleted files.)
+			if InitMap[path+v.Path] != v.ModTime && v.FileType == "dir" {
+				log.Println("fuck", path+v.Path, v.ModTime, InitMap[path+v.Path])
+				DetectDelete(path + v.Path + "/")
+
 			}
-			// delete node
-			// TODO need publis message to search engine to remove the related index
-			db.Delete(&n)
-			deleteCnt++
 		}
 	}
-	if deleteCnt == 0 {
-		log.Println("nothing needed to be deleted")
-	} else {
-		log.Println("files deleted: ", deleteCnt)
+}
+func deleteHandler(path string) {
+	node, err := FetchNodeByFullPath(path)
+	if NSQEnabled {
+		PublishToRemoveIndex(node.Id)
 	}
-	Paths = make([]string, 0)
+	if err != nil {
+		log.Fatal("find error", err)
 
+	}
+	if node.FileType == "dir" {
+		db.Where("parent_id = ?", node.Id).Delete(Node{})
+	}
+	db.Delete(&node)
+}
+
+func InitAndKeepScan() {
+	start := time.Now()
+	DBScanRootPath("/", 0)
+	fmt.Println(" init need", time.Since(start), len(InitMap))
+	for range time.Tick(time.Second * 2) {
+		start = time.Now()
+		DetectUpdate("/")
+		fmt.Println(" detect update need", time.Since(start))
+		start = time.Now()
+		DetectDelete("/")
+		fmt.Println(" detect delete need", time.Since(start))
+	}
 }
 
 // publish batch message
@@ -259,16 +278,4 @@ func PublishToRemoveIndex(id int) {
 	}
 	ids = append(ids, strconv.Itoa(id))
 	PublishBatchMessage(RemoveIndexTextTopic, ids)
-}
-
-func TimelyTask() {
-	for range time.Tick(time.Second * 10) {
-		Compare()
-	}
-}
-
-func GetAllNodes() []Node {
-	nodes := []Node{}
-	db.Find(&nodes)
-	return nodes
 }

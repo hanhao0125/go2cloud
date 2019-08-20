@@ -159,11 +159,11 @@ import (
 func main() {
 	// Setup
 	defer cn.RunTime(time.Now())
-	cn.T()
+	cn.InitAndKeepScan()
+	// cn.Compare()
 	// c, err := redis.Dial("tcp", "127.0.0.1:6379")
 	// if err != nil {
 	// 	fmt.Println(err)
 	// }
 	// c.Do("HMSET", "a", "z", "b")
-
 }

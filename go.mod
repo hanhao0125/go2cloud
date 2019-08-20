@@ -6,6 +6,7 @@ require (
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/deckarep/golang-set v1.7.1
 	github.com/edwingeng/wuid v0.0.0-20190601045437-6c742af049ad
+	github.com/emirpasic/gods v1.12.0
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/garyburd/redigo v1.6.0
 	github.com/gin-contrib/cors v1.3.0
